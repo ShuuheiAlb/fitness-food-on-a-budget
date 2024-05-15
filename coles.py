@@ -1,13 +1,14 @@
 from selenium import webdriver
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 
 def coles_search(suburb:str, item:str):
     """Returns list of list with "Name", "Price", "Spec" """
-    # Your path for "chromedriver". Check for correct version
-    chrome_driver_path = "Your Path"
-    driver = webdriver.Chrome(executable_path=chrome_driver_path)
+    # Your path for "firefoxdriver". Check for correct version
+    firefox_driver_path = "Your Path"
+    driver = webdriver.Firefox(service=Service(firefox_driver_path))
     # Item to search
     item_to_lookup = f"coles {item}"
     driver.get(f"https://shop.coles.com.au/a/{suburb}/home")
@@ -45,4 +46,4 @@ def coles_search(suburb:str, item:str):
     driver.quit()
     return listc
 
-# coles_search(suburb="gosnells", item="water")
+coles_search(suburb="gosnells", item="water")
