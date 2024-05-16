@@ -2,12 +2,7 @@ from coles import coles_search
 from woolies import woolies_search
 from googlesheet1 import google_sheet_wr
 
-# Minimum viable product:
-# MILK, EGG, CHICKEN BREAST, BEEF, SALMON, BEAN, (SARDINE, CHEESE, YOGHURT)
-# RICE, WW BREAD, OAT, POTATO, QUINOA, PASTA, CORN
-# PB, AVODACO, OLIVE OIL, ALMOND, CHIA, BUTTER
-# BERRIES, BANANA, APPLE, ORANGE, GRAPE, (PEAR, KIWI, WATERMELON, MANGO)
-# SPINACH, BROCOLLI, TOMATO, CABBAGE, CARROT, PEA, (CAPSICUM, ZUCHINNI, SPROUT)
+# Next plan: save the historical data into googlesheet
 
 item_to_search = str(input("Please input your item: "))
 
