@@ -34,7 +34,7 @@ for food in protein_foods:
         "content-type": "application/json",
         "origin": "https://www.woolworths.com.au",
         "priority": "u=1, i",
-        "referer": "https://www.woolworths.com.au/shop/search/products?searchTerm=milk&pageNumber=1",
+        "referer": f"https://www.woolworths.com.au/shop/search/products?searchTerm={food}&pageNumber=1",
         "request-id": "|74c2518bb1bc4a87ba7373a72de2499f.436c2500f7a54854",
         "sec-ch-ua": '"Chromium";v="124", "Brave";v="124", "Not-A.Brand";v="99"',
         "sec-ch-ua-mobile": "?0",
