@@ -2,6 +2,7 @@ from __future__ import print_function
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 
+# Next plan: save the historical data into googlesheet
 
 def google_sheet_wr(list, range:str):
     # remove /edit if you get SCOPES from google sheets
