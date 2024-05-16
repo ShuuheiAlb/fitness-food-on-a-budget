@@ -31,7 +31,3 @@ response = requests.request("GET", url, headers=headers, params=querystring, ver
 response.raise_for_status()  # raises exception when not a 2xx response
 if response.status_code != 204:
     print(response.json())
-else:
-    print(response.content)
-
-#coles_search(suburb="gosnells", item="water")

@@ -1,42 +1,90 @@
 import requests
+import json
+from unitpy import Quantity
+from unitpy.definitions.unit_base import BaseSet
+import numpy as np
 
-url = "https://www.woolworths.com.au/apis/ui/Search/products"
+protein_foods = ["milk", "egg", "chicken", "beef", "salmon", "bean"]
+protein_per_dollar = {}
 
-payload = {
-    "Filters": [],
-    "IsSpecial": False,
-    "Location": "/shop/search/products",
-    "PageNumber": 1,
-    "PageSize": 36,
-    "SortType": "TraderRelevance",
-    "IsRegisteredRewardCardPromotion": None,
-    "ExcludeSearchTypes": ["UntraceableVendors"],
-    "GpBoost": 0,
-    "GroupEdmVariants": True,
-    "EnableAdReRanking": False
-}
-headers = {
-    "cookie": "EnableLandingPageVideosContentService=true; EnableLandingPageIdeasContentService=true; AKA_A2=A; bff_region=syd2; ai_user=kPh5vamjorsgTXCOnVyMmj|2024-05-16T03:40:54.478Z; akaalb_woolworths.com.au=~op=www_woolworths_com_au_ZoneA:PROD-ZoneA|www_woolworths_com_au_BFF_SYD_Launch:WOW-BFF-SYD2|~rv=59~m=PROD-ZoneA:0|WOW-BFF-SYD2:0|~os=43eb3391333cc20efbd7f812851447e6~id=fe10e758f65623b90951cb55a3b57c48; INGRESSCOOKIE=1715830855.768.1742.124094|37206e05370eb151ee9f1b6a1c80a538; w-rctx=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE3MTU4MzA4NTQsImV4cCI6MTcxNTgzNDQ1NCwiaWF0IjoxNzE1ODMwODU0LCJpc3MiOiJXb29sd29ydGhzIiwiYXVkIjoid3d3Lndvb2x3b3J0aHMuY29tLmF1Iiwic2lkIjoiMCIsInVpZCI6ImNlMWNhOGYyLWJkZDAtNGU5Yi05YWJiLTJhZDQ3Y2YyNDFkNiIsIm1haWQiOiIwIiwiYXV0IjoiU2hvcHBlciIsImF1YiI6IjAiLCJhdWJhIjoiMCIsIm1mYSI6IjEifQ.ODNGqwVUFnkV5wmLlblaWy0QM8oFZiTmVaMgF53FdWl4RyD0d2rH-60EqqhJ7t6Yc6DjTB_-7iFHiXoIvczzvBGAeIAl8txkPwV6ItyA4Cylv5o_m4RSkC5WIHtveMml2MYfiMawe3Kz9OiMQW3Q6v8lfsXwhR74Gh-bPcsLvVy4spYqImwNvgjy6q4pE19zLuci9Ssx0WFMN3Q_jX11aH_c_gsSsiZeNdYPavzEKiAlttFQ9-w9c-euAmGzE6NRzhG7qBDE9sQ4KWrAs5qlylGuBc6pNGsX1Mrz5cPB0wGGJ5mfIYj48vECg5h0mubrxr4N2DYrivQ1MS01aIg9dw; wow-auth-token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE3MTU4MzA4NTQsImV4cCI6MTcxNTgzNDQ1NCwiaWF0IjoxNzE1ODMwODU0LCJpc3MiOiJXb29sd29ydGhzIiwiYXVkIjoid3d3Lndvb2x3b3J0aHMuY29tLmF1Iiwic2lkIjoiMCIsInVpZCI6ImNlMWNhOGYyLWJkZDAtNGU5Yi05YWJiLTJhZDQ3Y2YyNDFkNiIsIm1haWQiOiIwIiwiYXV0IjoiU2hvcHBlciIsImF1YiI6IjAiLCJhdWJhIjoiMCIsIm1mYSI6IjEifQ.ODNGqwVUFnkV5wmLlblaWy0QM8oFZiTmVaMgF53FdWl4RyD0d2rH-60EqqhJ7t6Yc6DjTB_-7iFHiXoIvczzvBGAeIAl8txkPwV6ItyA4Cylv5o_m4RSkC5WIHtveMml2MYfiMawe3Kz9OiMQW3Q6v8lfsXwhR74Gh-bPcsLvVy4spYqImwNvgjy6q4pE19zLuci9Ssx0WFMN3Q_jX11aH_c_gsSsiZeNdYPavzEKiAlttFQ9-w9c-euAmGzE6NRzhG7qBDE9sQ4KWrAs5qlylGuBc6pNGsX1Mrz5cPB0wGGJ5mfIYj48vECg5h0mubrxr4N2DYrivQ1MS01aIg9dw; prodwow-auth-token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE3MTU4MzA4NTQsImV4cCI6MTcxNTgzNDQ1NCwiaWF0IjoxNzE1ODMwODU0LCJpc3MiOiJXb29sd29ydGhzIiwiYXVkIjoid3d3Lndvb2x3b3J0aHMuY29tLmF1Iiwic2lkIjoiMCIsInVpZCI6ImNlMWNhOGYyLWJkZDAtNGU5Yi05YWJiLTJhZDQ3Y2YyNDFkNiIsIm1haWQiOiIwIiwiYXV0IjoiU2hvcHBlciIsImF1YiI6IjAiLCJhdWJhIjoiMCIsIm1mYSI6IjEifQ.ODNGqwVUFnkV5wmLlblaWy0QM8oFZiTmVaMgF53FdWl4RyD0d2rH-60EqqhJ7t6Yc6DjTB_-7iFHiXoIvczzvBGAeIAl8txkPwV6ItyA4Cylv5o_m4RSkC5WIHtveMml2MYfiMawe3Kz9OiMQW3Q6v8lfsXwhR74Gh-bPcsLvVy4spYqImwNvgjy6q4pE19zLuci9Ssx0WFMN3Q_jX11aH_c_gsSsiZeNdYPavzEKiAlttFQ9-w9c-euAmGzE6NRzhG7qBDE9sQ4KWrAs5qlylGuBc6pNGsX1Mrz5cPB0wGGJ5mfIYj48vECg5h0mubrxr4N2DYrivQ1MS01aIg9dw; at_check=true; AMCVS_4353388057AC8D357F000101%40AdobeOrg=1; fullstoryEnabled=false; s_cc=true; bm_mi=E6F0ECDABD6CD18843E186EC393F5FB9~YAAQ1EnVy3IrIWSPAQAASBWbfxcbyI7CK/jl7sc4WQ41AgcMggPa+xoXSk5YTyBuV9i76/aOXZKKuanjfQ3x7V2xyH1Gpb4KVpFRq/n1sKFNN6OLDqb3/4Fx9taqWACr490FAZcNV9CVm/kmTzhHqLopuYLxYiV8MtQdMXT2DH0NymRs4j0VaU6Q6C/gOMOIb/JpqZMcGuypQhJSWhywqfdmVq+BUeEsQ9pytpWG6m68NpB7DJ8POkoVXnBWdy/KR1EXytKOLgdLI+y3D1rZx7Uv83Q7GSKNJAnJvartcbrQUf2n/geusYjx69SpVYz17w3ol2OzLiHE/vJYrbeedTmoq5cZv21ANqJ7HyXaqOEoIG/F0z8i~1; bm_sv=5C70369C7132993B51B781822CE566A7~YAAQ1EnVyzowIWSPAQAAwS6bfxftJbQSA10QIJ6XWHbIygyGILdnrdILW6KDtG5WC3sMqfuV3uBXNxGTDqX1XSDQsAo9NDSBXydgb8ynV3osqDgN8wA4cDu0ob23clgx+IiwlihgjdkQJR1UIYNnTNqCWsMxUPhtfZNYJhuGiavMaER+TiClvClLd1YKSk8A/NYLFKSIqAlQbBbV9wFxOCfWqM1bFK5GdMhLB33WX0sbJAMKA0sEna8uIUjHz9OKTLwyMb/msJM=~1; ak_bmsc=74E5755E185B65DAB67E3471CE9BCF2B~000000000000000000000000000000~YAAQ1EnVy2vUIWSPAQAA54qefxemsFun48TGGiLkmU1g68LYI2op4BNhEG/OU+Q8xWT3zLhmSd8fIGLzxaBOxEyZfA+xdv8k3JiVzAVWQH2PD+Nb/EZiexaLn6b738lIG/PoNFzp04ZBcXJ9SKPncLm5GAq2+rSk0sfMpsCFyZI5XO/i5aYlA75ZXYlRJUc+6REHdFR6cF3Mpn2B/eKzRS+dF3XTQvRDoBOwmJqXQQT3Tunx3Mo1DByUTHC34hr6BDr4kINy09rXYCcmD8TMraNk7wQlUyyBIY/1KoNsKy6kY63EI9Ekp8sXzREFFfvOsbgrbv8T4kDR0KEJKpqzvhHiyqd0txTsrCB3iRcDbIjTbCLJrHjtmIgd+2sB2J28Wqe3M4HxPx5doPZwrqlPYub+z/ts9wixPSIgRLc4ib3iWcTif6qgAM23D+cqZxx4zmnLdKhPOmXvVX7/uZ6Lo6YXhgbZUKz6nw8=; dtCookie=v_4_srv_5_sn_E86957BB17A9F4F1D708914D90CA01E5_perc_100000_ol_0_mul_1_app-3Af908d76079915f06_1_rcs-3Acss_0; bm_sz=894F8F293DB23B9440074F234E116649~YAAQ1EnVyzSNImSPAQAAZwGifxdBpX+laJ8+nfYeBGsBfeRPQObadXRbYptbCHK7xoc61wAy/CBXjB6Ik+/F0v8kIIS4MQR2pTMlkjc5iCLqTGwSJof8p4R1fkmIB7hnMHP3Ng1Y8euOfHiC+yNW7PuImolzDBX8tKMHL/5Eyof3R/ouutvNohEN7BauRaK4sIFC8bDFjjPF9TmLdI0M6vAmXozzYsvIYZv+NPOV4DYo0zJHesyXB0vIV0SGslOlxaL7QDNJ+9QXEAEi+EGKTlPO9Z7MfUlr4xm1L7l7X3V3F6vzTLIDfaEBlC8hCixy0H44fmAMm6NTdJxOLmnfMspfHAR/u2h85RqpbhEarbmMFi4S3A2UYZx0qjx1YzLbeoYumMHnD5gAg6gh9NHomksjCAV6daZh0yIyaave+HuKhZjdhIp+Z8QUxRdcN5U=~3488068~3551811; mbox=session#caed45cb24fb4461bf934c9418f17cb5#1715835136|PC#caed45cb24fb4461bf934c9418f17cb5.36_0#1779075657; AMCV_4353388057AC8D357F000101%40AdobeOrg=179643557%7CMCIDTS%7C19860%7CMCMID%7C13945814881315684679185098284510855405%7CMCOPTOUT-1715840475s%7CNONE%7CvVersion%7C5.5.0; utag_main=v_id:018f7f7d2637004c8230cc5d67c804065001e05d008d7$_sn:1$_se:47$_ss:0$_st:1715835076633$ses_id:1715830859320%3Bexp-session$_pn:4%3Bexp-session$vapi_domain:woolworths.com.au$dc_visit:1$dc_event:11%3Bexp-session; ai_session=4FdbfI2EN60y7siBG4m/Qr|1715830854810|1715833276668; _abck=17C5C9351EF6A7F72E9F99B927A103EE~-1~YAAQ1EnVy8GOImSPAQAAUwmifwuOUF11EYLvaYVocyL4QYzwYqwooLlLGVsYX7a1QZBPPt6CShdZit5yoBUZr2461iYzd9xhpLP5GzNqjrK44a8JB/YIkJd8W//A0xwmkxePtaagdGVULxYvD1mXRgFeiKaj8zM3ILeoTWyUYT3G40wRKs3IWa+Ke+t9y+DzAFuo1a1SetElZkCsGMnUafTWVbkpiikD7dzG+OR43HLG53gCZQl7YEub5SjNcahzwr9AHpBpV/TbbKAzGpR1ZF/lKFoeR9VE9u8DuWmsmCinN1YXQIhfttq6kaxJHYAQtVVAh+w+su/XxCxQsrvYYhgb/X2+POMYWd3wz1q5OvRlvCB4QIqgdlaObf0xtl4RSnXNtLECRj5CTsgqr6Bfdw==~-1~||0||~1715834455",
-    "accept": "application/json, text/plain, */*",
-    "accept-language": "en-GB,en;q=0.9",
-    "content-type": "application/json",
-    "origin": "https://www.woolworths.com.au",
-    "priority": "u=1, i",
-    "referer": "https://www.woolworths.com.au/shop/search/products",
-    "request-id": "|717a0d8040b94fc0a0e7651be8ed3c7a.4e34850eb3de40bc",
-    "sec-ch-ua": '"Chromium";v="124", "Brave";v="124", "Not-A.Brand";v="99"',
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": '"Linux"',
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin",
-    "sec-gpc": "1",
-    "traceparent": "00-717a0d8040b94fc0a0e7651be8ed3c7a-4e34850eb3de40bc-01",
-    "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-}
+for food in protein_foods:
+    
+    url = "https://www.woolworths.com.au/apis/ui/Search/products"
 
-response = requests.request("POST", url, json=payload, headers=headers)
+    payload = {
+        "Filters": [],
+        "IsSpecial": False,
+        "Location": f"/shop/search/products?searchTerm{food}&pageNumber1",
+        "PageNumber": 1,
+        "PageSize": 10,
+        "SearchTerm": f"{food}",
+        "SortType": "TraderRelevance",
+        "IsRegisteredRewardCardPromotion": None,
+        "ExcludeSearchTypes": ["UntraceableVendors"],
+        "GpBoost": 0,
+        "GroupEdmVariants": True,
+        "EnableAdReRanking": False
+    }
+    headers = {
+        # the bm_sv cookie expires in 15 mins
+        # the bm_szcookie expires in 2:15 hrs
+        "cookie": "EnableLandingPageVideosContentService=true; EnableLandingPageIdeasContentService=true; bff_region=syd2; ai_user=kPh5vamjorsgTXCOnVyMmj|2024-05-16T03:40:54.478Z; akaalb_woolworths.com.au=~op=www_woolworths_com_au_ZoneA:PROD-ZoneA|www_woolworths_com_au_BFF_SYD_Launch:WOW-BFF-SYD2|~rv=59~m=PROD-ZoneA:0|WOW-BFF-SYD2:0|~os=43eb3391333cc20efbd7f812851447e6~id=fe10e758f65623b90951cb55a3b57c48; INGRESSCOOKIE=1715830855.768.1742.124094|37206e05370eb151ee9f1b6a1c80a538; at_check=true; AMCVS_4353388057AC8D357F000101%40AdobeOrg=1; s_cc=true; dtCookie=v_4_srv_5_sn_E86957BB17A9F4F1D708914D90CA01E5_perc_100000_ol_0_mul_1_app-3Af908d76079915f06_1_rcs-3Acss_0; bm_sz=120EB4F718A7601DE1354F4DB6E9B22E~YAAQrEnVy3ZLPXWPAQAAigUcgRcNQE64iZW+rdJqzFS2cEF1vBNIZxLt3PHzNrx97HaSxMEAKizaIC4pTY/FYwcBklQEjXjuStyknIuJKYp+jvtTp+VrkN0ZojWWQ6JwLJP0aszTmB1hqeVUwXQmZaLzAZgbeRCxnUSSegsK0Vrf5UU/XKkPS7PpDYnpVDPlQ7s3PfL/NJVldx2GgsDzcV0K50ZfnUy3CQUSkuyKCL3Yhjmi6aMWODxsTOPqcDUyFdU72ivm6TE3SPNWt/d89HXcAVAUz37yIfCnCAcq+HdStFvG/hjW01hCxGhQqhc14YtY1U8LPOW0P1OifVeLSy15VtaI7JoPCybWVr0JYMaDiqdiikKV5eIjuBpmIOY43mxRltPL7guevYgVVJJ9oFRYNQEojZ/OXXmuXySnwfCoT8hkqiPs9WGzTE+8gSzlJJ+eiPtU7M9e40BG5+u15biFNGRkog4dgrK5Xzxavw==~4404547~3289397; BVImplmain_site=14865; fullstoryEnabled=false; w-rctx=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE3MTU4NjE4ODksImV4cCI6MTcxNTg2NTQ4OSwiaWF0IjoxNzE1ODYxODg5LCJpc3MiOiJXb29sd29ydGhzIiwiYXVkIjoid3d3Lndvb2x3b3J0aHMuY29tLmF1Iiwic2lkIjoiMCIsInVpZCI6IjlmNjNiNTFjLWY3OGYtNGJjNi04Yzk1LWM5NmI5MjcyNWRjOCIsIm1haWQiOiIwIiwiYXV0IjoiU2hvcHBlciIsImF1YiI6IjAiLCJhdWJhIjoiMCIsIm1mYSI6IjEifQ.TtISoLMjR6_0ZGs2Fp1cFmj-1V92595OZiO9eJvaznqxLo0piomx79-HEZoWc8qNlqJIfAI0ly6uo5P4XhPOJw_Mb6lrBzkwrkeLNUDOfEBNhAwGsVA4Vg7f2NQW5OId61Hqn569bZLI5OJcUaD2Iv9axTZnaSb4ncpDLRCaJVNakDGj9AnGSzzy8A9ytM8mIA1JYAlcFMaPKdIp30Pcsp9dVtaz7QyI3aPdkUDPCSjPy8dVR-imEYDll91OSiRUNgPY5CV4N7zMUbBjxwhSn4DDOwA86LvkyWIT6pbjpQ3CciJeKQftU2AWsUUHWtehhHfaGI_Uy7stiEcOdY-e_Q; wow-auth-token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE3MTU4NjE4ODksImV4cCI6MTcxNTg2NTQ4OSwiaWF0IjoxNzE1ODYxODg5LCJpc3MiOiJXb29sd29ydGhzIiwiYXVkIjoid3d3Lndvb2x3b3J0aHMuY29tLmF1Iiwic2lkIjoiMCIsInVpZCI6IjlmNjNiNTFjLWY3OGYtNGJjNi04Yzk1LWM5NmI5MjcyNWRjOCIsIm1haWQiOiIwIiwiYXV0IjoiU2hvcHBlciIsImF1YiI6IjAiLCJhdWJhIjoiMCIsIm1mYSI6IjEifQ.TtISoLMjR6_0ZGs2Fp1cFmj-1V92595OZiO9eJvaznqxLo0piomx79-HEZoWc8qNlqJIfAI0ly6uo5P4XhPOJw_Mb6lrBzkwrkeLNUDOfEBNhAwGsVA4Vg7f2NQW5OId61Hqn569bZLI5OJcUaD2Iv9axTZnaSb4ncpDLRCaJVNakDGj9AnGSzzy8A9ytM8mIA1JYAlcFMaPKdIp30Pcsp9dVtaz7QyI3aPdkUDPCSjPy8dVR-imEYDll91OSiRUNgPY5CV4N7zMUbBjxwhSn4DDOwA86LvkyWIT6pbjpQ3CciJeKQftU2AWsUUHWtehhHfaGI_Uy7stiEcOdY-e_Q; prodwow-auth-token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE3MTU4NjE4ODksImV4cCI6MTcxNTg2NTQ4OSwiaWF0IjoxNzE1ODYxODg5LCJpc3MiOiJXb29sd29ydGhzIiwiYXVkIjoid3d3Lndvb2x3b3J0aHMuY29tLmF1Iiwic2lkIjoiMCIsInVpZCI6IjlmNjNiNTFjLWY3OGYtNGJjNi04Yzk1LWM5NmI5MjcyNWRjOCIsIm1haWQiOiIwIiwiYXV0IjoiU2hvcHBlciIsImF1YiI6IjAiLCJhdWJhIjoiMCIsIm1mYSI6IjEifQ.TtISoLMjR6_0ZGs2Fp1cFmj-1V92595OZiO9eJvaznqxLo0piomx79-HEZoWc8qNlqJIfAI0ly6uo5P4XhPOJw_Mb6lrBzkwrkeLNUDOfEBNhAwGsVA4Vg7f2NQW5OId61Hqn569bZLI5OJcUaD2Iv9axTZnaSb4ncpDLRCaJVNakDGj9AnGSzzy8A9ytM8mIA1JYAlcFMaPKdIp30Pcsp9dVtaz7QyI3aPdkUDPCSjPy8dVR-imEYDll91OSiRUNgPY5CV4N7zMUbBjxwhSn4DDOwA86LvkyWIT6pbjpQ3CciJeKQftU2AWsUUHWtehhHfaGI_Uy7stiEcOdY-e_Q; AKA_A2=A; ak_bmsc=1FEE63DCB7FBE3E780ACD411125D9ABB~000000000000000000000000000000~YAAQogUgF0WlMXyPAQAAIn55gRcYPuBAbUKpXzuRHPQgULSnKHuiZu/Upqsw11quMiedluXNsXRLN++HArRnrOwjBS/d3b+n0LeQZ5yO3l7TgugGKrrcztJcZL3CG439EQybmP82899M4KoqXR39AqK06jYaGxvDOnH5hbG6X97zoLCQCBkRPB5x9RioJnDrlhoO6yw0kzWS1kG/wpaPNRQQ7O1b5MT5nNrwCcgMBZc+1K3Eje8di+d/y+Juj1uOevRLmjOriONhG/b2I11XO8G8E6EwB9TEfmDwVMNAmU6Y2IV1+1JsOtXph4CqwiPhgv+EifPhZ3OrzOfaLQcFF6ODYbbX8l3TpKoKuwA3pkyvGKne1JJ8oRloesypzVTiQwfjHbCCvzzzDOHzj7U1k4h5Lg==; mbox=PC#caed45cb24fb4461bf934c9418f17cb5.36_0#1779075657|session#5dd7b8e893dc4092abbf9270c81eee02#1715866035; AMCV_4353388057AC8D357F000101%40AdobeOrg=179643557%7CMCIDTS%7C19860%7CMCMID%7C13945814881315684679185098284510855405%7CMCOPTOUT-1715871374s%7CNONE%7CvVersion%7C5.5.0; utag_main=v_id:018f7f7d2637004c8230cc5d67c804065001e05d008d7$_sn:5$_se:30$_ss:0$_st:1715865976007$vapi_domain:woolworths.com.au$dc_visit:5$ses_id:1715862537045%3Bexp-session$_pn:6%3Bexp-session$dc_event:6%3Bexp-session; ai_session=wsSOZ04sFDyYML1VXwed+Q|1715852199700|1715864176449; _abck=17C5C9351EF6A7F72E9F99B927A103EE~-1~YAAQogUgF9mlMXyPAQAAu4d5gQth0fcGg+8bcEzw6STuI5eeMQ0norKJYcu4wAq1e+q8gaDetuYNZgfXT9B4mRvBaCjCJeajcq6A1DstN7XYOPtT5Gp2bJcARZogonMAykfwkBr0ZJSDX40bh9+CJPFYE8jESN64hrZrRnG+pikf7/mLjy/2I8vy9T+9G1rAImBRxpTzhb3KEI0TpupGksB+FbIymjyuEHL+3bBO0x8oYbTGsjLuPzHGZmCZd6A5uZN0a6BStpCrBicgKc11xUV1lD9zcpTwbbmOuH2fwLlu+sV3kP5WfcBITJ2l6Y0kEUILHkWvDDzKmxh0kF2uSPrpM+XrNWubIYgv4DgPhfEpB3DtRVfFdPuQnLUWxcDK3Lxd+v0=~-1~-1~1715866831; bm_mi=1B03158CB7B642B30782970783311C90~YAAQogUgF9qlMXyPAQAAu4d5gRfQUXt0xqrKTJJ8pa5s2RvsdIeTa/fuhHG69tL2mmRdRJcn3DLriY6Zva/iqB8mCeZ4TUkJZvV4eqnXYTt8HhUt9LJuO/JNTj4RFZML1CiLZ6kW6OAFjCrCz9qCPOM3dP1/YFjUKqRktFnWwlZJfl0xzzoWmwoKRzyt89sUE/eUwzDvVPCzNoA6ABtSNFF9+7H3Zp62EaEcyPaNFGWwxqSoCT9gZN+u/3zbVn3I9Rz1Lu06Tx+iut4p9cNCVV+oLaPEdTOMPXEUk0EUIkQ28IS2NPnXn9iNg9OTHIRIEq+4DSluL3xVbTB6Ji7T7pWRUFl3/giGbMxUhkT+~1; bm_sv=6B9E4DD519EBB83D9FD07C2A5B3DD268~YAAQogUgF9ulMXyPAQAAu4d5gRdNQvspP1eXL4RF2fSmPv8n1SDg2EGtapl+lFB5Mtkxp06Ymeb93CTcePtQYzZpMzKnOdycJ/FrnXUmXA+WhUQYEqgv1eHCLigeRZoFIj+zxigW4nEaprOJLvt0HTBWKVhIoDEIiDq5uG/lpvjiqo/Ws//uCsG9Ae7x2qvWGQNl0H1G1azx+6YLa5Te2tluQuYvhz9hsQ7ozW9p8GCPDDbTy56DGen5S8adOoVZ5w6/jneQyMw=~1",
+        "accept": "application/json, text/plain, */*",
+        "accept-language": "en-GB,en;q=0.9",
+        "content-type": "application/json",
+        "origin": "https://www.woolworths.com.au",
+        "priority": "u=1, i",
+        "referer": "https://www.woolworths.com.au/shop/search/products?searchTerm=milk&pageNumber=1",
+        "request-id": "|74c2518bb1bc4a87ba7373a72de2499f.436c2500f7a54854",
+        "sec-ch-ua": '"Chromium";v="124", "Brave";v="124", "Not-A.Brand";v="99"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"Linux"',
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "sec-gpc": "1",
+        "traceparent": "00-74c2518bb1bc4a87ba7373a72de2499f-436c2500f7a54854-01",
+        "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    }
 
-print(response.json())
+    response = requests.request("POST", url, json=payload, headers=headers)
 
-# then parse them acc to nutritional price etc
+    #print(response.json())
+
+    #=== 
+
+    data = response.json()
+    prices = []
+    sizes = []
+    macro_ratios = []
+    for subdata in data["Products"]:
+        prod = subdata["Products"][0]
+        price = prod["InstorePrice"]
+        size = prod["PackageSize"]
+        try:
+            nutri = json.loads(prod["AdditionalAttributes"]["nutritionalinformation"]) 
+            for obj in nutri["Attributes"]:
+                if obj["Id"] == 878: # protein
+                    macro_ratio = obj["Value"]
+                    if not macro_ratio[0].isdigit():
+                        macro_ratio = None
+                    break
+        except:
+            macro_ratio = None
+        
+        if not (price and size and macro_ratio):
+            continue
+        prices.append(Quantity(float(price), ""))
+        sizes.append(Quantity(size.lower()))
+        macro_ratios.append(Quantity(macro_ratio)/Quantity("100g"))
+                                    
+    # Averagely (sum price)/(sum ratio * size)
+    res = np.dot(macro_ratios, sizes) / np.sum(prices)
+    # Convert liquid size
+    if res.base_unit == BaseSet(meter=3):
+        res *= Quantity(1000, "gram/liter")
+
+    protein_per_dollar[food] = res
+
+# Milk = 13g per dollar
+# Egg = 10.33g per dol;ar
