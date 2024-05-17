@@ -7,4 +7,4 @@ The Woolsworths' requests are dependent on updated cookies. I will try to automa
 
 The Coles' requests are dependent on the date and versions of the latest data, and thus needs to be regularly maintained. Previous data are planned to be recorded into spreadsheet.
 
-( Initially forked from AshyBoy91's ColesVsWooles_Web_Scraping )
+( Initially forked from AshyBoy91's Web Scraping project )
