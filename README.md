@@ -1,10 +1,8 @@
 # Fitness Food Price Dashboard
 ## Comparing price of food for various macronutrients
 
-This project is being developed to compare the average price of food in Australia for various macronutrients from two largest AU supermarket chain: Woolsworths and Coles.
+This project is being developed to compare the average macronutrients per dollar of various food sold in two largest Australian supermarket chain: Woolsworths and Coles.
 
-The Woolsworths' requests are dependent on updated cookies. I will try to automate this process later.
-
-The Coles' requests are dependent on the date and versions of the latest data, and thus needs to be regularly maintained. Previous data are planned to be recorded into spreadsheet.
+The request urls for Coles are dependent on date/version. I plan to extract them by Selenium at the beginning of the scrapping process.
 
 ( Initially forked from AshyBoy91's Web Scraping project )

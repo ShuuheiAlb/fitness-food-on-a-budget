@@ -1,16 +1,12 @@
 
+#%%
+
 import lib
 import requests
 
-macro_food_dict = {
-    "protein": ["milk", "egg", "chicken", "beef", "pork", "sardine", "bean", "almond", "chia"],
-    "carb": ["rice", "wholewheat-bread", "oat", "potato", "quinoa", "pasta", "corn"],
-    "fat": ["avocado", "olive-oil", "peanut-butter", "greek-yoghurt", "cheese", "salmon", "tuna", "sardine", "almond"],
-    #"fruit": ["berry", "banana", "apple", "orange", "grape", "pear", "kiwi", "lemon", \
-    #          "watermelon", "pineapple", "mango"],
-    #"vegetable": ["spinach", "cabbage", "lettuce", "brocolli", "cauliflower", "tomato", "carrot", "capsicum", \
-    #              "zucchini", "mushroom", "choy buk"]
-}
+lib.macro_food_dict
+
+#%%
 
 # prev = [20230510.01_v3.87.0, ]
 url = "https://www.coles.com.au/_next/data/20240514.01_v3.88.0/en/browse/dairy-eggs-fridge/long-life-milk.json"
@@ -43,3 +39,9 @@ response = requests.request("GET", url, headers=headers, params=querystring, ver
 response.raise_for_status()  # raises exception when not a 2xx response
 if response.status_code != 204:
     print(response.json())
+
+
+# %%
+
+# For each item, use Scrapy? to find id="nutritional-information-control"
+
