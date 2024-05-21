@@ -1,7 +1,7 @@
-# Fitness Food Price Dashboard
+# "Fitness Food on a Budget" Dashboard
 
-This project is being developed to compare macronutrients per dollar of various food sold in two largest Australian supermarket chain: Woolsworths and Coles.
+This project is being developed to compare macronutrients per dollar of various food sources sold in two largest Australian supermarket chains: Woolsworths and Coles.
 
-Current result (Coles' is on the way soon):
+Here is a snippet of the current (minimum viable) result (the Coles' one is coming up soon):
 
-![Dashboard of macronutrient amount per dollar for various food based on two supermarket chains](figure.png)
+![Fitness food on a budget: Screenshot of Streamlit dashboard, showing the amount of carbs per dollar for various selected foods](figure.png)
