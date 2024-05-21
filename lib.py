@@ -57,21 +57,23 @@ requests_kwargs = {
     },
     "coles_search": lambda var, date_version: {
         "url": f"https://www.coles.com.au/_next/data/{date_version}/en/search/products.json",
-        "params": { "q": f"{var}", "page": "1" },
+        "params": { "q": var, "page": "1" },
         "headers": {
             "accept": "*/*",
             "accept-language": "en-GB,en;q=0.5",
-            "referer": f"https://www.coles.com.au/search//products?q={var}",
+            "referer": f"https://www.coles.com.au/search/products?q={var}",
             "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         },
         "verify": False
     },
-    "coles_spec": lambda sub_url: {
-        "url": f"https://www.coles.com.au/product/{sub_url}",
+    "coles_spec": lambda var, date_version, q: {
+        "url": f"https://www.coles.com.au/_next/data/{date_version}/en/{var}.json",
+        "params": { "slug": var },
         "headers": {
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "accept": "*/*",
             "accept-language": "en-GB,en;q=0.5",
             "sec-ch-ua": '"Chromium";v="124", "Brave";v="124", "Not-A.Brand";v="99"',
+            "referer": f"https://www.coles.com.au/search/products?q={q}",
             "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
         },
         "verify": False

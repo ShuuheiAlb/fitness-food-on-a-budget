@@ -3,7 +3,6 @@
 import lib
 import requests
 import json
-import pint
 import csv
 import re
 
