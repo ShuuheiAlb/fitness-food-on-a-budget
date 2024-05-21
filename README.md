@@ -2,6 +2,6 @@
 
 This project is being developed to compare macronutrients per dollar of various food sold in two largest Australian supermarket chain: Woolsworths and Coles.
 
-The request urls for Coles are dependent on date/version. I plan to extract them by Selenium at the beginning of the scrapping process.
+Current result (Coles' is on the way soon):
 
-( Initially forked from AshyBoy91's Web Scraping project )
+![Dashboard of macronutrient amount per dollar for various food based on two supermarket chains](figure.png)
