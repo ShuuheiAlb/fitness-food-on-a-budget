@@ -1,10 +1,14 @@
 
 #
 # Library for web scraping
-#
+# 
 
 import pint
 import random
+
+# - Now you know their names :D
+SUPA = "woolworths"
+SUPB = "coles"
 
 # Food options and constants
 macro_foods = {
@@ -34,15 +38,15 @@ weights = [0.59, 0.05, 0.15, 0.03, 0.02, 0.01, 0.15]
 
 # The long request's url, payload, header etc
 requests_kwargs = {
-    "woolies_init": {
-        "url": "https://www.woolworths.com.au/",
+    "supa_init": {
+        "url": f"https://www.{SUPA}.com.au/",
         "headers": {
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
             "user-agent": random.choices(user_agents, weights=weights)[0]
         }
     },
-    "woolies_search": lambda var: {
-        "url": "https://www.woolworths.com.au/apis/ui/Search/products",
+    "supa_search": lambda var: {
+        "url": f"https://www.{SUPA}.com.au/apis/ui/Search/products",
         "json": {
             "Location": f"/shop/search/products?searchTerm{var}",
             "SearchTerm": f"{var}",
@@ -52,13 +56,13 @@ requests_kwargs = {
         "headers": {
             "accept": "application/json, text/plain, */*",
             "content-type": "application/json",
-            "origin": "https://www.woolworths.com.au",
-            "referer": f"https://www.woolworths.com.au/shop/search/products?searchTerm={var}",
+            "origin": f"https://www.{SUPA}.com.au",
+            "referer": f"https://www.{SUPA}.com.au/shop/search/products?searchTerm={var}",
             "user-agent": random.choices(user_agents, weights=weights)[0]
         }
     },
-    "coles_init": {
-        "url": "https://www.coles.com.au/",
+    "supb_init": {
+        "url": f"https://www.{SUPB}.com.au/",
         "headers": {
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8",
             "accept-language": "en-GB,en;q=0.5",
@@ -66,24 +70,24 @@ requests_kwargs = {
         },
         "verify": False
     },
-    "coles_search": lambda var, date_version: {
-        "url": f"https://www.coles.com.au/_next/data/{date_version}/en/search/products.json",
+    "supb_search": lambda var, date_version: {
+        "url": f"https://www.{SUPB}.com.au/_next/data/{date_version}/en/search/products.json",
         "params": { "q": var, "page": "1" },
         "headers": {
             "accept": "*/*",
             "accept-language": "en-GB,en;q=0.5",
-            "referer": f"https://www.coles.com.au/search/products?q={var}",
+            "referer": f"https://www.{SUPB}.com.au/search/products?q={var}",
             "user-agent": random.choices(user_agents, weights=weights)[0]
         },
         "verify": False
     },
-    "coles_spec": lambda var, date_version, q: {
-        "url": f"https://www.coles.com.au/_next/data/{date_version}/en/{var}.json",
+    "supb_spec": lambda var, date_version, q: {
+        "url": f"https://www.{SUPB}.com.au/_next/data/{date_version}/en/{var}.json",
         "params": { "slug": var },
         "headers": {
             "accept": "*/*",
             "accept-language": "en-GB,en;q=0.5",
-            "referer": f"https://www.coles.com.au/search/products?q={q}",
+            "referer": f"https://www.{SUPB}.com.au/search/products?q={q}",
             "user-agent": random.choices(user_agents, weights=weights)[0]
         },
         "verify": False

@@ -14,7 +14,7 @@ Q_ = lib.Q_
 # Initialise session
 # Quirk: find a specified date_version to access API url path
 s = requests.Session()
-init_r = s.get(**lib.requests_kwargs["coles_init"])
+init_r = s.get(**lib.requests_kwargs["supb_init"])
 date_version = re.search(r'src="/_next/static/([0-9\.]+_v[0-9\.]+)/.+.js"', init_r.text). \
     groups()[0]
 
@@ -25,7 +25,7 @@ date_version = re.search(r'src="/_next/static/([0-9\.]+_v[0-9\.]+)/.+.js"', init
 macro_per_AUD_df = []
 for macro in macro_food_dict:
     for food in macro_food_dict[macro]:
-        srch = lib.requests_kwargs["coles_search"]
+        srch = lib.requests_kwargs["supb_search"]
         srch_r = s.get(**srch(food, date_version))
         #print(srch_r.json())
 
@@ -42,7 +42,7 @@ for macro in macro_food_dict:
                     size = Q_(item["size"].lower())
                     
                     # Get nutiriton info
-                    spec = lib.requests_kwargs["coles_spec"]
+                    spec = lib.requests_kwargs["supb_spec"]
                     sub_url = "/product/" + "-".join(re.split(r"[^A-Za-z0-9]+", item["description"].lower())) + "-" + str(item["id"])
                     spec_r = s.get(**spec(sub_url, date_version, food))
                     subdata = spec_r.json()
@@ -85,7 +85,7 @@ for macro in macro_food_dict:
 
 # %%
 # Append to csv
-with open('out/coles_out.csv', 'w', newline='') as f:
+with open('out/supb_out.csv', 'w', newline='') as f:
     writer = csv.writer(f)
     writer.writerows([["Category", "Food", "Amount/$"]])
     writer.writerows(macro_per_AUD_df)

@@ -4,7 +4,10 @@ import streamlit as st
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("out/woolies_out.csv", header=0)
+# Importing dataset
+# The supermarket names are censored as "supa" and "supb" here
+
+df = pd.read_csv("out/supa_out.csv", header=0)
 df["Amount/$"] = df["Amount/$"].apply(lambda x: float(x.replace(" gram", "")))
 
 st.title("Fitness Food on a Budget")

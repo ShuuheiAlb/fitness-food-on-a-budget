@@ -14,7 +14,7 @@ Q_ = lib.Q_
 
 # Initialise session
 s = requests.Session()
-init = lib.requests_kwargs["woolies_init"]
+init = lib.requests_kwargs["supa_init"]
 s.get(**init)
 
 #%%
@@ -25,7 +25,7 @@ s.get(**init)
 macro_per_AUD_df = []
 for macro in macro_food_dict:
     for food in macro_food_dict[macro]:
-        srch =  lib.requests_kwargs["woolies_search"]
+        srch =  lib.requests_kwargs["supa_search"]
         response = s.post(**srch(food))
         #print(response.json())
 
@@ -68,7 +68,7 @@ for macro in macro_food_dict:
 
 # %%
 # Append to csv
-with open('out/woolies_out.csv', 'w', newline='') as f:
+with open('out/supa_out.csv', 'w', newline='') as f:
     writer = csv.writer(f)
     writer.writerows([["Category", "Food", "Amount/$"]])
     writer.writerows(macro_per_AUD_df)
