@@ -1,6 +1,6 @@
-matplotlib
+matplotlib==3.7.5
 pandas==2.0.3
 Pint==0.21.1
-Requests
-seaborn
+Requests==2.32.2
+seaborn==0.13.2
 streamlit==1.34.0

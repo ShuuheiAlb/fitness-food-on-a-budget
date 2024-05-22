@@ -2,6 +2,6 @@
 
 This project compares the amount of macronutrients per unit price for selected food sources sold in two largest Australian supermarket chains: Woolsworths and Coles.
 
-Here is a snippet of the current (minimum viable) result (the Coles' one is coming up soon):
+The current visualisation is here: https://shuuheialb-fitness-food-on-a-budget-main-whza79.streamlit.app/.
 
-![Fitness food on a budget: Screenshot of Streamlit dashboard, showing the amount of carbs per dollar](figure.png)
+The Coles' data incorporation is coming up soon.
