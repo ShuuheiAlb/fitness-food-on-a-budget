@@ -5,7 +5,6 @@ import lib
 import requests
 import re
 import csv
-from bs4 import BeautifulSoup
 
 macro_food_dict = lib.macro_foods
 ureg = lib.ureg
@@ -21,7 +20,7 @@ date_version = re.search(r'src="/_next/static/([0-9\.]+_v[0-9\.]+)/.+.js"', init
 
 # %%
 # Debug: small case
-#macro_food_dict = { "protein": ["milk"] }
+#macro_food_dict = { "protein": ["beef"] }
 
 macro_per_AUD_df = []
 for macro in macro_food_dict:

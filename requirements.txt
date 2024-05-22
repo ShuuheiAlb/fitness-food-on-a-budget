@@ -1,0 +1,6 @@
+matplotlib
+pandas==2.0.3
+Pint==0.21.1
+Requests
+seaborn
+streamlit==1.34.0
