@@ -11,6 +11,7 @@ macro_food_dict = lib.macro_foods
 ureg = lib.ureg
 Q_ = lib.Q_
 
+#%%
 # Initialise session
 # Quirk: find a specified date_version to access API url path
 s = requests.Session()
