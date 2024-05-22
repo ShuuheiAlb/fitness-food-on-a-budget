@@ -5,7 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Importing dataset
-# The supermarket names are censored as "supa" and "supb" here
+# Supermarket name appearing on variables are aliased as "supa" (Woolworths) and "supb" (Coles)
 
 df = pd.read_csv("out/supa_out.csv", header=0)
 df["Amount/$"] = df["Amount/$"].apply(lambda x: float(x.replace(" gram", "")))
