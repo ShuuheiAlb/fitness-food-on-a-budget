@@ -11,10 +11,9 @@ macro_foods = {
     "protein": ["milk", "egg", "chicken", "beef", "pork", "sardine", "bean", "almond", "chia"],
     "carb": ["rice", "wholewheat-bread", "oat", "potato", "quinoa", "pasta", "corn"],
     "fat": ["avocado", "olive-oil", "peanut-butter", "greek-yoghurt", "cheese", "salmon", "tuna", "sardine", "almond"],
-    #"fruit": ["berry", "banana", "apple", "orange", "grape", "pear", "kiwi", "lemon", \
-    #          "watermelon", "pineapple", "mango"],
-    #"vegetable": ["spinach", "cabbage", "lettuce", "brocolli", "cauliflower", "tomato", "carrot", "capsicum", \
-    #              "zucchini", "mushroom", "choy buk"]
+    "fruit": ["berry", "banana", "apple", "orange", "grape", "pear", "kiwi", "lemon"],
+    "vegetable": ["spinach", "cabbage", "lettuce", "brocolli", "cauliflower", "tomato", "carrot", "capsicum", \
+                  "zucchini", "mushroom", "choy buk"]
 }
 
 # Objects to handle units

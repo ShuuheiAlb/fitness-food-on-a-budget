@@ -59,8 +59,10 @@ for macro in macro_food_dict:
                 mpaud *= Q_("1000 gram/liter")
             
             mpauds.append(mpaud)
-                                        
+        
         # Average from all items
+        if len(mpauds) == 0:
+            continue
         macro_per_AUD_overall = sum(mpauds)/len(mpauds)
         macro_per_AUD_df.append([macro, food, str(macro_per_AUD_overall.to("gram"))])
 
