@@ -25,6 +25,8 @@ s.get(**init)
 macro_per_AUD_df = []
 for macro in macro_food_dict:
     for food in macro_food_dict[macro]:
+        print(f"Processing {macro} contained in {food}...")
+        
         srch =  lib.requests_kwargs["supa_search"]
         response = s.post(**srch(food))
         #print(response.json())
