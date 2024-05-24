@@ -3,6 +3,8 @@ import pandas as pd
 import streamlit as st
 import seaborn as sns
 import matplotlib.pyplot as plt
+from os.path import getmtime
+from datetime import datetime
 
 # Importing dataset
 # Supermarket name appearing on variables are aliased as "supa" (Woolworths) and "supb" (Coles)
@@ -38,3 +40,6 @@ for i in ax.containers:
 
 st.pyplot(fig)
 
+st.caption(f"*(as of {datetime.fromtimestamp(getmtime('out/supa_out.csv')).strftime('%d %b %Y')})*")
+
+# %%
