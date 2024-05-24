@@ -5,3 +5,7 @@ This project compares the amount of macronutrients per unit price among selected
 The current visualisation is here: https://shuuheialb-fitness-food-on-a-budget-main-whza79.streamlit.app/.
 
 The data was collected and then aggregated from web scraping, with the number of requests minimised as possible. I do not take any liabilities for any consequences resulting from the use of this project by others, nor am I affiliated with any of these companies.
+
+## How to use
+
+Run `supa.py` then `supb.py` (still buggy) then `streamlit run main.py`.
