@@ -9,6 +9,9 @@ from datetime import datetime
 # Importing dataset
 # Supermarket name appearing on variables are aliased as "supa" (Woolworths) and "supb" (Coles)
 
+with open("style.css") as css:
+    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
+
 df = pd.read_csv("out/supa_out.csv", header=0)
 df["Amount/$"] = df["Amount/$"].apply(lambda x: float(x.replace(" gram", "")))
 
