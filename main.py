@@ -37,9 +37,9 @@ sns.despine(left=True, bottom=True)
 # Labels, ticks etc
 ax.set(xlabel="", ylabel="")
 ax.tick_params(axis='x', bottom=False, labelbottom=False)
-ax.tick_params(axis='y', left=False, labelsize=14)
+ax.tick_params(axis='y', left=False, pad=10, labelsize="x-large", labelcolor="#606060")
 for i in ax.containers:
-    ax.bar_label(i, fmt="%.1f", padding=10, size=12)
+    ax.bar_label(i, fmt="%.1f", padding=15, size="x-large", color="#606060")
 
 st.pyplot(fig)
 
