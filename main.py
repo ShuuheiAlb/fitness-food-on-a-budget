@@ -1,6 +1,8 @@
 #%%
-import pandas as pd
 import streamlit as st
+from pathlib import Path
+import shutil
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from os.path import getmtime
@@ -9,7 +11,10 @@ from datetime import datetime
 # Importing dataset
 # Supermarket name appearing on variables are aliased as "supa" (Woolworths) and "supb" (Coles)
 
-with open("style.css") as css:
+css_file = Path(st.__path__[0]) / "static" / "style.css"
+if not css_file.exists():
+    shutil.copy("style.css", css_file)
+with open(css_file) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
 df = pd.read_csv("out/supa_out.csv", header=0)
