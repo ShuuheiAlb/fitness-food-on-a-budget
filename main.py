@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 from os.path import getmtime
 from datetime import datetime
 
-# CSS: manually put it instead of style.css since Streamlit Deployment makes this much more complicated
-# There is style.css for a backup tho, just in case
+# CSS: manually put it since Streamlit Deployment makes "the other way" much more complicated
+# Otherwise for offline use, style.css can be used
 css_str = '[class^="st-emotion"]  { font-weight: 500; }'
 st.markdown( f'<style>{css_str}</style>' , unsafe_allow_html= True)
 
