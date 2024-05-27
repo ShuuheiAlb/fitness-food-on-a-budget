@@ -1,23 +1,15 @@
 #%%
 import streamlit as st
-from pathlib import Path
-import shutil
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from os.path import getmtime
 from datetime import datetime
 
-# CSS setting: put the file on Streamlit's static folder
-CSS_PATH = Path(st.__path__[0]) / "static" / "css" # to avoid PermissionError
-if not CSS_PATH.is_dir():
-    CSS_PATH.mkdir()
-css_file = CSS_PATH / "style.css"
-if not css_file.exists():
-    shutil.copy("style.css", css_file)
-
-with open(css_file) as css:
-    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
+# CSS: manually put it instead of style.css since Streamlit Deployment makes this much more complicated
+# There is style.css for a backup tho, just in case
+css_str = '[class^="st-emotion"]  { font-weight: 500; }'
+st.markdown( f'<style>{css_str}</style>' , unsafe_allow_html= True)
 
 # Importing dataset
 # Supermarket name appearing on variables are aliased as "supa" (Woolworths) and "supb" (Coles)
