@@ -16,9 +16,7 @@ st.markdown( f'<style>{css_str}</style>' , unsafe_allow_html= True)
 df_a = pd.read_csv("out/supa_out.csv", header=0)
 df_b = pd.read_csv("out/supb_out.csv", header=0)
 df_concat = pd.concat([df_a, df_b])
-df_concat["Amount"] = df_concat["Amount"].apply(lambda x: float(x.replace(" gram", "")) if pd.notnull(x) else x)
-df = df_concat.groupby(df_concat.columns[:-1].tolist())\
-            .mean().reset_index()
+df = df_concat.groupby(df_concat.columns[:-1].tolist()).mean().reset_index()
 # Test divergence: pd.merge(df_a, df_b, on=["Category", "Food"])
 
 st.title("Fitness Food on a Budget")

@@ -61,7 +61,7 @@ for macro in macro_food_dict:
                         continue
             except:
                 continue
-            mpaud = ratio * size / price
+            mpaud = ratio * (size/Q_("1g")) / price
 
             # If liquid, convert the unit from volume to mass
             if mpaud.check("[volume]"):
@@ -73,11 +73,12 @@ for macro in macro_food_dict:
         if len(mpauds) == 0:
             continue
         macro_per_AUD_overall = sum(mpauds)/len(mpauds)
-        macro_per_AUD_df.append([macro, food, str(macro_per_AUD_overall.to("gram"))])
+        macro_per_AUD_df.append([macro, food, macro_per_AUD_overall])
 
 # %%
 # Append to csv
-with open('out/supa_out.csv', 'w', newline='') as f:
+macro_per_AUD_df = [["macro", "food", 12]]
+with open('out/supa_out2.csv', 'w', newline='') as f:
     writer = csv.writer(f)
     writer.writerows([["Category", "Food", "Amount"]])
     writer.writerows(macro_per_AUD_df)
