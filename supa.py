@@ -19,14 +19,18 @@ s.get(**init)
 
 #%%
 # Debug: small case
-#macro_food_dict = { "fat": ["olive-oil"] }
+#macro_food_dict = { "vegetable": ["cabbage"] }
 
 # Search items for each macro-food pair, then collect their info
 macro_per_AUD_df = []
 for macro in macro_food_dict:
     for food in macro_food_dict[macro]:
         print(f"Processing {macro} contained in {food}...")
-        
+        # Skip first: weight not in catalog
+        if food in ["cabbage"]:
+            macro_per_AUD_df.append([macro, food, ""])
+            continue
+    
         srch =  lib.requests_kwargs["supa_search"]
         response = s.post(**srch(food))
         #print(response.json())
@@ -36,8 +40,11 @@ for macro in macro_food_dict:
         for subdata in data["Products"]:
             prod = subdata["Products"][0]
             try:
+                if not prod["IsInStock"]:
+                    continue
                 price = Q_(prod["InstoreCupPrice"])
-                size = Q_(prod["CupMeasure"].lower())
+                size = Q_(re.sub('ea$', '', prod["CupMeasure"].lower())
+                
                 if macro in ["fruit", "vegetable"]:
                     ratio = 1
                 else:
@@ -45,7 +52,7 @@ for macro in macro_food_dict:
                     nutri = json.loads(prod["AdditionalAttributes"]["nutritionalinformation"])
                     for obj in nutri["Attributes"]:
                         if obj["Id"] == nutri_code_dict[macro]:
-                            ratio_fmt = re.match(r"^(Approx.)?([0-9.]+)([A-Za-z]+)$",obj["Value"]) # regex check
+                            ratio_fmt = re.match(r"^(Approx.)?([0-9.]+)([A-Za-z]+)$", obj["Value"]) # regex check
                             ratio_num = ratio_fmt.groups()[1]
                             ratio_unit = ratio_fmt.groups()[2]
                             if ratio_unit:
@@ -72,5 +79,5 @@ for macro in macro_food_dict:
 # Append to csv
 with open('out/supa_out.csv', 'w', newline='') as f:
     writer = csv.writer(f)
-    writer.writerows([["Category", "Food", "Amount/$"]])
+    writer.writerows([["Category", "Food", "Amount"]])
     writer.writerows(macro_per_AUD_df)

@@ -1,4 +1,4 @@
-Category,Food,Amount/$
+Category,Food,Amount
 protein,milk,13.512011810084497 gram
 protein,egg,13.89674449309944 gram
 protein,beef,12.615527065527067 gram
@@ -8,3 +8,37 @@ protein,sardine,6.94597190293742 gram
 protein,bean,5.869611111111112 gram
 protein,almond,7.461888571217962 gram
 protein,chia,9.179307789518969 gram
+carb,rice,82.10875283446714 gram
+carb,wholewheat-bread,56.7226883543386 gram
+carb,oat,110.57634727845254 gram
+carb,potato,
+carb,quinoa,45.08785037878788 gram
+carb,pasta,105.17504492362984 gram
+carb,corn,38.99980459785949 gram
+fat,avocado,20.075185185185187 gram
+fat,olive-oil,37.309437512378686 gram
+fat,peanut-butter,27.50967806290095 gram
+fat,greek-yoghurt,8.388128101110004 gram
+fat,cheese,9.560770547945207 gram
+fat,salmon,2.0476669309372797 gram
+fat,tuna,5.62751146112728 gram
+fat,sardine,5.221125319693094 gram
+fat,almond,14.79702358455344 gram
+fruit,berry,57.82252080004888 gram
+fruit,banana,102.95128205128204 gram
+fruit,apple,338.9830508474576 gram
+fruit,orange,286.8725776292989 gram
+fruit,grape,111.16894606604049 gram
+fruit,pear,208.29436867480345 gram
+fruit,kiwi,33.86904761904762 gram
+fruit,lemon,409.8045674132631 gram
+vegetable,spinach,69.19841269841271 gram
+vegetable,cabbage,61.53846153846154 gram
+vegetable,lettuce,71.66666666666667 gram
+vegetable,brocolli,107.85658075939405 gram
+vegetable,cauliflower,99.17015946427712 gram
+vegetable,tomato,123.10273060273062 gram
+vegetable,carrot,291.19657817479947 gram
+vegetable,capsicum,57.61707262498402 gram
+vegetable,zucchini,40.2003927003927 gram
+vegetable,mushroom,53.07017543859649 gram

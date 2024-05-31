@@ -13,8 +13,13 @@ st.markdown( f'<style>{css_str}</style>' , unsafe_allow_html= True)
 
 # Importing dataset
 # Supermarket name appearing on variables are aliased as "supa" (Woolworths) and "supb" (Coles)
-df = pd.read_csv("out/supa_out.csv", header=0)
-df["Amount/$"] = df["Amount/$"].apply(lambda x: float(x.replace(" gram", "")))
+df_a = pd.read_csv("out/supa_out.csv", header=0)
+df_b = pd.read_csv("out/supb_out.csv", header=0)
+df_concat = pd.concat([df_a, df_b])
+df_concat["Amount"] = df_concat["Amount"].apply(lambda x: float(x.replace(" gram", "")) if pd.notnull(x) else x)
+df = df_concat.groupby(df_concat.columns[:-1].tolist())\
+            .mean().reset_index()
+# Test divergence: pd.merge(df_a, df_b, on=["Category", "Food"])
 
 st.title("Fitness Food on a Budget")
 
@@ -28,7 +33,7 @@ curr_data = df[df["Category"] == curr_cat]
 
 # Main plot
 fig = plt.figure(figsize=(12, 6))
-ax = sns.barplot(x='Amount/$', y='Food', hue='Food', data=curr_data.sort_values(by="Amount/$", ascending=False),
+ax = sns.barplot(x='Amount', y='Food', hue='Food', data=curr_data.sort_values(by="Amount", ascending=False),
                palette=sns.color_palette(palette="pastel", n_colors=len(curr_data)), legend=False)
 
 # Styling: colors etc
@@ -44,6 +49,7 @@ for i in ax.containers:
 
 st.pyplot(fig)
 
+# Should do the supb soon too
 st.caption(f"*(as of {datetime.fromtimestamp(getmtime('out/supa_out.csv')).strftime('%d %b %Y')})*")
 
 # %%

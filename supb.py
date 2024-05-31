@@ -7,6 +7,7 @@ import re
 import csv
 
 macro_food_dict = lib.macro_foods
+nutri_key_dict = { "protein": "Protein", "carb": "Carbohydrate", "fat": "Total Fat", "fruit": None, "vegetable": None }
 ureg = lib.ureg
 Q_ = lib.Q_
 
@@ -20,7 +21,7 @@ date_version = re.search(r'src="/_next/static/([0-9\.]+_v[0-9\.]+)/.+.js"', init
 
 # %%
 # Debug: small case
-macro_food_dict = { "protein": ["bean"] }
+#macro_food_dict = {"protein": ["chicken"], "carb": ["potato"]}
 
 # Throttle request check
 from ratelimit import limits, sleep_and_retry
@@ -37,8 +38,9 @@ macro_per_AUD_df = []
 for macro in macro_food_dict:
     for food in macro_food_dict[macro]:
         print(f"Processing {macro} contained in {food}...")
-        # skip some first
-        if food in ["chicken"]:
+        # Skip some first: these products do not have nutrition info
+        if food in ["chicken", "potato"]:
+            macro_per_AUD_df.append([macro, food, ""])
             continue
 
         srch = lib.requests_kwargs["supb_search"]
@@ -77,11 +79,10 @@ for macro in macro_food_dict:
                         nutri_percentage = subdata["pageProps"]["product"]["nutrition"]["breakdown"][0]
                         assert nutri_percentage["title"] == "Per 100g/ml"
                         for n in nutri_percentage["nutrients"]:
-                            print(n, sub_url)
-                            # Check how many errors at this stage with price available
+                            #print(n, sub_url)
                             # Otherwise, match AFCD dataset
 
-                            if n["nutrient"].lower() == macro:
+                            if n["nutrient"] == nutri_key_dict[macro]:
                                 ratio = Q_(n["value"])/Q_("100")
                                 if ratio.check("[mass]"):
                                     ratio /= Q_("1g")
@@ -101,6 +102,8 @@ for macro in macro_food_dict:
                 mpauds.append(mpaud)
 
         # Average from all items
+        if len(mpauds) == 0:
+            continue
         macro_per_AUD_overall = sum(mpauds)/len(mpauds)
         macro_per_AUD_df.append([macro, food, str(macro_per_AUD_overall.to("gram"))])
 
@@ -108,8 +111,6 @@ for macro in macro_food_dict:
 # Append to csv
 with open('out/supb_out.csv', 'w', newline='') as f:
     writer = csv.writer(f)
-    writer.writerows([["Category", "Food", "Amount/$"]])
+    writer.writerows([["Category", "Food", "Amount"]])
     writer.writerows(macro_per_AUD_df)
 
-
-# %%

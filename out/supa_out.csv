@@ -1,4 +1,4 @@
-Category,Food,Amount/$
+Category,Food,Amount
 protein,milk,14.20147600266329 gram
 protein,egg,13.308949659430148 gram
 protein,chicken,14.835592576252541 gram
@@ -33,6 +33,7 @@ fruit,pear,287.5666302567594 gram
 fruit,kiwi,111.75115207373274 gram
 fruit,lemon,128.22913151928566 gram
 vegetable,spinach,49.66587687048534 gram
+vegetable,cabbage,
 vegetable,lettuce,71.24946876328092 gram
 vegetable,brocolli,138.30254973645972 gram
 vegetable,cauliflower,140.93900709140254 gram

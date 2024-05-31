@@ -13,7 +13,7 @@ macro_foods = {
     "fat": ["avocado", "olive-oil", "peanut-butter", "greek-yoghurt", "cheese", "salmon", "tuna", "sardine", "almond"],
     "fruit": ["berry", "banana", "apple", "orange", "grape", "pear", "kiwi", "lemon"],
     "vegetable": ["spinach", "cabbage", "lettuce", "brocolli", "cauliflower", "tomato", "carrot", "capsicum", \
-                  "zucchini", "mushroom", "choy buk"]
+                  "zucchini", "mushroom"]
 }
 
 # Objects to handle units
