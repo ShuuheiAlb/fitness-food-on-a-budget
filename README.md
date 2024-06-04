@@ -8,8 +8,8 @@ The data was collected from web scraping with the number of requests minimised a
 
 ## How to use
 
-Run `supa.py` then `supb.py` (still buggy) then `streamlit run main.py`
+Run `supa.py` then `supb.py` then `streamlit run main.py`
 
 ## Other tools used
 
-Insomnia
+Insomnia, VS Code Notebook, pipreqs
