@@ -4,12 +4,14 @@
 import lib
 import requests
 import re
+import pandas as pd
 import csv
 
 macro_food_dict = lib.macro_foods
 nutri_key_dict = { "protein": "Protein", "carb": "Carbohydrate", "fat": "Total Fat", "fruit": None, "vegetable": None }
 ureg = lib.ureg
 Q_ = lib.Q_
+afcd = pd.read_excel("afcd.xlsx", "All solids & liquids per 100g")
 
 #%%
 # Initialise session
@@ -21,7 +23,7 @@ date_version = re.search(r'src="/_next/static/([0-9\.]+_v[0-9\.]+)/.+.js"', init
 
 # %%
 # Debug: small case
-#macro_food_dict = {"protein": ["chicken"], "carb": ["potato"]}
+macro_food_dict = {"protein": ["chicken"], "carb": ["potato"]}
 
 # Throttle request check
 from ratelimit import limits, sleep_and_retry
@@ -38,10 +40,6 @@ macro_per_AUD_df = []
 for macro in macro_food_dict:
     for food in macro_food_dict[macro]:
         print(f"Processing {macro} contained in {food}...")
-        # Skip some first: these products do not have nutrition info
-        if food in ["chicken", "potato"]:
-            macro_per_AUD_df.append([macro, food, ""])
-            continue
 
         srch = lib.requests_kwargs["supb_search"]
         srch_r = supb_call(s, srch(food, date_version))
@@ -57,10 +55,19 @@ for macro in macro_food_dict:
                     if not item["availability"]:
                         continue
                     price = Q_(item["pricing"]["now"])
-                    size = Q_(item["size"].lower())
+                    size = Q_(re.sub('((^approx. )|( each$))', '', item["size"].lower()))
+                    if size.check(""):
+                        # no weight info
+                        continue
                     
                     if macro in ["fruit", "vegetable"]:
                         ratio = 1
+                    elif food in ["chicken", "potato"]:
+                        # These products do not have nutrition info. Matching AFCD dataset ...
+                        food_keys = {"chicken": "F002806", "potato": "F007325"}
+                        macro_keys = {"protein": "Protein \n(g)", "fat": "Fat, total \n(g)", "carb": "Available carbohydrate, without sugar alcohols \n(g)" }
+                        n_value = afcd.loc[afcd["Public Food Key"] == food_keys[food], macro_keys[macro]].values[0]
+                        ratio = Q_(n_value)/Q_("100")
                     else:
                         ratio = None
 
@@ -80,8 +87,6 @@ for macro in macro_food_dict:
                         assert nutri_percentage["title"] == "Per 100g/ml"
                         for n in nutri_percentage["nutrients"]:
                             #print(n, sub_url)
-                            # Otherwise, match AFCD dataset
-
                             if n["nutrient"] == nutri_key_dict[macro]:
                                 ratio = Q_(n["value"])/Q_("100")
                                 if ratio.check("[mass]"):
@@ -105,7 +110,7 @@ for macro in macro_food_dict:
         if len(mpauds) == 0:
             continue
         macro_per_AUD_overall = sum(mpauds)/len(mpauds)
-        macro_per_AUD_df.append([macro, food, macro_per_AUD_overall])
+        macro_per_AUD_df.append([macro, food, format(macro_per_AUD_overall.to(""), "~")])
 
 # %%
 # Append to csv
