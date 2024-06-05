@@ -1,17 +1,19 @@
 #%%
-import streamlit as st
+import lib
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.patches import FancyBboxPatch
+
+import streamlit as st
 from os.path import getmtime
 from datetime import datetime
 
 # Supermarket name appearing on variables are aliased as "supa" (Woolworths) and "supb" (Coles)
 @st.cache_data
 def load_data():
-    df_a = pd.read_csv("out/supa_out.csv", header=0)
-    df_b = pd.read_csv("out/supb_out.csv", header=0)
+    df_a = pd.read_csv(lib.supa_out_path, header=0)
+    df_b = pd.read_csv(lib.supb_out_path, header=0)
     df_concat = pd.concat([df_a, df_b])
     return df_concat.groupby(df_concat.columns[:-1].tolist()).mean().reset_index()
 
@@ -66,8 +68,8 @@ plt_obj = select_plot(df, curr_cat)
 
 st.pyplot(plt_obj["fig"])
 
-# Should do the supb soon too
-last_update_time = datetime.fromtimestamp(getmtime("out/supa_out.csv"))
-st.caption(f"*(as of {last_update_time.strftime('%d %b %Y')})*")
+supa_last_update = datetime.fromtimestamp(getmtime(lib.supa_out_path))
+supb_last_update = datetime.fromtimestamp(getmtime(lib.supb_out_path))
+st.caption(f"*(as of {supa_last_update.strftime('%d %b %Y')} for Woolworths, {supb_last_update.strftime('%d %b %Y')} for Coles)*")
 
 # %%

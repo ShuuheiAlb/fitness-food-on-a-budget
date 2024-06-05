@@ -11,7 +11,7 @@ macro_food_dict = lib.macro_foods
 nutri_key_dict = { "protein": "Protein", "carb": "Carbohydrate", "fat": "Total Fat", "fruit": None, "vegetable": None }
 ureg = lib.ureg
 Q_ = lib.Q_
-afcd = pd.read_excel("afcd.xlsx", "All solids & liquids per 100g")
+afcd = pd.read_excel(lib.acfd_path, "All solids & liquids per 100g")
 
 #%%
 # Initialise session
@@ -114,7 +114,7 @@ for macro in macro_food_dict:
 
 # %%
 # Append to csv
-with open('out/supb_out.csv', 'w', newline='') as f:
+with open('lib.supb_out_path, 'w', newline='') as f:
     writer = csv.writer(f)
     writer.writerows([["Category", "Food", "Amount"]])
     writer.writerows(macro_per_AUD_df)

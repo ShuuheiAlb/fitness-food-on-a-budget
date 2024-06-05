@@ -6,6 +6,11 @@
 import pint
 import random
 
+# Paths
+supa_out_path = "data/supa_out.csv"
+supb_out_path = "data/supb_out.csv"
+acfd_path = "data/afcd.xlsx"
+
 # Food options and constants
 macro_foods = {
     "protein": ["milk", "egg", "chicken", "beef", "pork", "sardine", "bean", "almond", "chia"],
