@@ -1,12 +1,9 @@
 #%%
 import lib
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from matplotlib.patches import FancyBboxPatch
 
 import streamlit as st
-from pathlib import Path
+import altair as alt
 from os.path import getmtime
 from datetime import datetime
 
@@ -21,39 +18,35 @@ def load_data():
     return df_concat.groupby(df_concat.columns[:-1].tolist()).mean().reset_index()
 
 # Plot based on macronutrient selection
-@st.cache_data()
-def select_plot(df, category):
-    fig, ax = plt.subplots(figsize=(12, 6))
+@st.cache_data
+def select_plot_alt(df, category):
     sub_df = df[df["Category"] == category]
-    sns.barplot(x='Amount', y='Food', hue='Food', legend=False,
-                data=sub_df.sort_values(by="Amount", ascending=False),
-                palette=sns.color_palette(palette="pastel", n_colors=len(sub_df)))
+    # Soon: better palette, sizing
+    base = alt.Chart(sub_df).encode(
+        x=alt.X("Amount:Q") \
+            .axis(None),
+        y=alt.Y("Food:N") \
+            .sort("-x") \
+            .axis(grid=False, domain=False, ticks=False, title="", \
+                  offset=10, labelFontSize=16, labelColor="#444"),
+        tooltip=alt.value(None)
+    )
 
-    # Styling
-    sns.set_style("white")
-    sns.despine(left=True, bottom=True)
+    bar = base.mark_bar().encode(
+        color=alt.Color("Amount:Q") \
+            .scale(scheme="pastel1") \
+            .legend(None)
+    )
+    #food_text = base.mark_text(align="left", dx=-100, size=14).encode(
+    #    text=alt.Text("Food:N")
+    #)
+    text = base.mark_text(align="left", dx=5, size=14).encode(
+        text=alt.Text("Amount:Q").format(".2f"),
+        color=alt.ColorValue("#444")
+    )
 
-    # Ticks/labels
-    ax.set(xlabel="", ylabel="")
-    ax.tick_params(axis='x', bottom=False, labelbottom=False)
-    ax.tick_params(axis='y', left=False, pad=10, labelsize="x-large", labelcolor="#606060")
-    for i in ax.containers:
-        ax.bar_label(i, fmt="%.1f", padding=15, size="x-large", color="#606060")
-
-    # Make rounded bars
-    new_patches = []
-    for patch in reversed(ax.patches):
-        bb = patch.get_bbox()
-        color = patch.get_facecolor()
-        p_bbox = FancyBboxPatch((bb.xmin, bb.ymin), abs(bb.width), abs(bb.height),
-                                boxstyle="round, pad=0.01, rounding_size=0.2", mutation_aspect=0.7,
-                                ec="none", fc=color)
-        patch.remove()
-        new_patches.append(p_bbox)
-    for patch in new_patches:
-        ax.add_patch(patch)
-
-    return {"fig": fig, "ax": ax}
+    res = (bar + text).properties(width="container", height=alt.Step(40)).configure_view(stroke="transparent")
+    return res
 
 def main():
     # Inline CSS it since Streamlit Deploy makes style.css much more complicated
@@ -66,11 +59,9 @@ def main():
     curr_cat = st.selectbox("Macronutrient (in gram/AUD)",
                             ("protein", "carb", "fat", "fruit", "vegetable"),
                             index=0, placeholder="Select")
-    plt_obj = select_plot(df, curr_cat)
+    alt_obj = select_plot_alt(df, curr_cat)
 
-    print("Time: %s seconds " % (time.time() - start_time))
-    st.pyplot(plt_obj["fig"])
-    print("Time: %s seconds " % (time.time() - start_time))
+    st.altair_chart(alt_obj, use_container_width=True, theme=None)
 
     supa_last_update = datetime.fromtimestamp(getmtime(lib.supa_out_path))
     supb_last_update = datetime.fromtimestamp(getmtime(lib.supb_out_path))

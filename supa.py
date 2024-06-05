@@ -43,7 +43,7 @@ for macro in macro_food_dict:
                 if not prod["IsInStock"]:
                     continue
                 price = Q_(prod["InstoreCupPrice"])
-                size = Q_(re.sub('ea$', '', prod["CupMeasure"].lower())
+                size = Q_(re.sub('ea$', '', prod["CupMeasure"].lower()))
                 
                 if macro in ["fruit", "vegetable"]:
                     ratio = 1

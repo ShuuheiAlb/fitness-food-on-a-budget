@@ -114,7 +114,7 @@ for macro in macro_food_dict:
 
 # %%
 # Append to csv
-with open('lib.supb_out_path, 'w', newline='') as f:
+with open(lib.supb_out_path, 'w', newline='') as f:
     writer = csv.writer(f)
     writer.writerows([["Category", "Food", "Amount"]])
     writer.writerows(macro_per_AUD_df)
