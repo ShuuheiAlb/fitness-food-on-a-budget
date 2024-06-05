@@ -6,14 +6,17 @@ import seaborn as sns
 from matplotlib.patches import FancyBboxPatch
 
 import streamlit as st
+from pathlib import Path
 from os.path import getmtime
 from datetime import datetime
+
+import time
 
 # Supermarket name appearing on variables are aliased as "supa" (Woolworths) and "supb" (Coles)
 @st.cache_data
 def load_data():
-    df_a = pd.read_csv(lib.supa_out_path, header=0)
-    df_b = pd.read_csv(lib.supb_out_path, header=0)
+    df_a = pd.read_csv("data/supa_out.csv", header=0)
+    df_b = pd.read_csv("data/supb_out.csv", header=0)
     df_concat = pd.concat([df_a, df_b])
     return df_concat.groupby(df_concat.columns[:-1].tolist()).mean().reset_index()
 
@@ -52,24 +55,30 @@ def select_plot(df, category):
 
     return {"fig": fig, "ax": ax}
 
-# ===
+def main():
+    # Inline CSS it since Streamlit Deploy makes style.css much more complicated
+    css_str = '[class^="st-emotion"]  { font-weight: 500; }'
+    st.markdown( f'<style>{css_str}</style>' , unsafe_allow_html= True)
 
-# Inline CSS it since Streamlit Deploy makes style.css much more complicated
-css_str = '[class^="st-emotion"]  { font-weight: 500; }'
-st.markdown( f'<style>{css_str}</style>' , unsafe_allow_html= True)
+    st.title("Fitness Food on a Budget")
 
-st.title("Fitness Food on a Budget")
+    df = load_data()
+    curr_cat = st.selectbox("Macronutrient (in gram/AUD)",
+                            ("protein", "carb", "fat", "fruit", "vegetable"),
+                            index=0, placeholder="Select")
+    plt_obj = select_plot(df, curr_cat)
 
-df = load_data()
-curr_cat = st.selectbox("Macronutrient (in gram/AUD)",
-                        ("protein", "carb", "fat", "fruit", "vegetable"),
-                        index=0, placeholder="Select")
-plt_obj = select_plot(df, curr_cat)
+    print("Time: %s seconds " % (time.time() - start_time))
+    st.pyplot(plt_obj["fig"])
+    print("Time: %s seconds " % (time.time() - start_time))
 
-st.pyplot(plt_obj["fig"])
+    supa_last_update = datetime.fromtimestamp(getmtime(lib.supa_out_path))
+    supb_last_update = datetime.fromtimestamp(getmtime(lib.supb_out_path))
+    st.caption(f"*(as of {supa_last_update.strftime('%d %b %Y')} for Woolworths, {supb_last_update.strftime('%d %b %Y')} for Coles)*")
 
-supa_last_update = datetime.fromtimestamp(getmtime(lib.supa_out_path))
-supb_last_update = datetime.fromtimestamp(getmtime(lib.supb_out_path))
-st.caption(f"*(as of {supa_last_update.strftime('%d %b %Y')} for Woolworths, {supb_last_update.strftime('%d %b %Y')} for Coles)*")
-
+# Time check
+if __name__ == "__main__":
+    start_time = time.time()
+    main()
+    print("Time: %s seconds " % (time.time() - start_time))
 # %%
