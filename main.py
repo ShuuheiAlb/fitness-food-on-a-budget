@@ -15,8 +15,8 @@ import time
 # Supermarket name appearing on variables are aliased as "supa" (Woolworths) and "supb" (Coles)
 @st.cache_data
 def load_data():
-    df_a = pd.read_csv("data/supa_out.csv", header=0)
-    df_b = pd.read_csv("data/supb_out.csv", header=0)
+    df_a = pd.read_csv(lib.supa_out_path, header=0)
+    df_b = pd.read_csv(lib.supb_out_path, header=0)
     df_concat = pd.concat([df_a, df_b])
     return df_concat.groupby(df_concat.columns[:-1].tolist()).mean().reset_index()
 
