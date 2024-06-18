@@ -15,7 +15,8 @@ def load_data():
     df_a = pd.read_csv(lib.supa_out_path, header=0)
     df_b = pd.read_csv(lib.supb_out_path, header=0)
     df_concat = pd.concat([df_a, df_b])
-    return df_concat.groupby(df_concat.columns[:-1].tolist()).mean().reset_index()
+    df_agg = df_concat.groupby(df_concat.columns[:-1].tolist()).mean().reset_index()
+    return df_agg
 
 # Plot based on macronutrient selection
 @st.cache_data
@@ -26,7 +27,7 @@ def select_plot_alt(df, category):
         x=alt.X("Amount:Q") \
             .axis(None),
         y=alt.Y("Food:N") \
-            .sort("-x") \
+            .sort(alt.EncodingSortField(field="Amount", order="descending")) \
             .axis(grid=False, domain=False, ticks=False, title="", \
                   offset=10, labelFontSize=16, labelColor="#444"),
         tooltip=alt.value(None)
@@ -37,9 +38,6 @@ def select_plot_alt(df, category):
             .scale(scheme="pastel1") \
             .legend(None)
     )
-    #food_text = base.mark_text(align="left", dx=-100, size=14).encode(
-    #    text=alt.Text("Food:N")
-    #)
     text = base.mark_text(align="left", dx=5, size=14).encode(
         text=alt.Text("Amount:Q").format(".2f"),
         color=alt.ColorValue("#444")
