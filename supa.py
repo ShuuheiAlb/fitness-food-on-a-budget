@@ -19,7 +19,7 @@ s.get(**init)
 
 #%%
 # Debug: small case
-#macro_food_dict = { "vegetable": ["cabbage"] }
+#macro_food_dict = { "vegetable": ["spinach"]}
 
 # Search items for each macro-food pair, then collect their info
 macro_per_AUD_df = []
@@ -36,7 +36,6 @@ for macro in macro_food_dict:
         #print(response.json())
 
         data = response.json()
-        mpauds = []
         for subdata in data["Products"]:
             prod = subdata["Products"][0]
             try:
@@ -44,6 +43,8 @@ for macro in macro_food_dict:
                     continue
                 price = Q_(prod["InstoreCupPrice"])
                 size = Q_(re.sub('ea$', '', prod["CupMeasure"].lower()))
+                if not (size.check("[volume]") or size.check("[mass]")):
+                    continue # size is not litre nor gram, throw away
                 
                 if macro in ["fruit", "vegetable"]:
                     ratio = 1
@@ -64,16 +65,14 @@ for macro in macro_food_dict:
             mpaud = ratio * (size/Q_("1g")) / price
 
             # If liquid, convert the unit from volume to mass
-            if mpaud.check("[volume]"):
+            if size.check("[volume]"):
                 mpaud *= Q_("1000 gram/liter")
             
-            mpauds.append(mpaud)
-        
-        # Average from all items
-        if len(mpauds) == 0:
-            continue
-        macro_per_AUD_overall = sum(mpauds)/len(mpauds)
-        macro_per_AUD_df.append([macro, food, format(macro_per_AUD_overall.to(""), "~")])
+            macro_per_AUD_df.append([macro, food, format(mpaud.to(""), "~")])
+
+        # Placeholder for product with empty rows
+        if len(data["Products"]) == 0:
+            macro_per_AUD_df.append([macro, food, ""])
 
 # %%
 # Append to csv
