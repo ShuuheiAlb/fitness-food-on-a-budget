@@ -10,11 +10,13 @@
       background: #fff;
       padding: 40px;
     }
+    h2 {
+      font-size: 35px;
+    }
     text {
       text-transform: uppercase;
       font-weight: bold;
       fill: #333;
-      font-size: 28px;
     }
     .food-label, .median-label {
       text-transform: uppercase;
@@ -102,11 +104,8 @@
           .attr("y2", d => yScale(d.Food))
           .attr("stroke-width", lineThickness);
 
-        // Create a container group for text labels to apply skew later
-        const labelGroup = group.append("g");
-
         // Add food labels (to the left)
-        labelGroup.selectAll(".food-label")
+        group.selectAll(".food-label")
           .data(filtered)
           .enter()
           .append("text")
@@ -115,10 +114,15 @@
           .attr("y", d => yScale(d.Food) - lineHeightOffset/2)
           .attr("text-anchor", "end")
           .attr("dominant-baseline", "middle")
+          .each(function(d, i) {
+            // `this` is the current text element in the loop
+            d3.select(this)
+              .attr("transform", `skewX(-10) translate(${i / Math.tan(10) * 7} 0)`); // 5 SOON UPDATED
+          })
           .text(d => d.Food);
 
         // Add median labels (to the right)
-        labelGroup.selectAll(".median-label")
+        group.selectAll(".median-label")
           .data(filtered)
           .enter()
           .append("text")
@@ -127,11 +131,11 @@
           .attr("y", d => yScale(d.Food) - lineHeightOffset/2)
           .attr("text-anchor", "start")
           .attr("dominant-baseline", "middle")
-          .attr("transform", "skewX(-10deg)")
+          .each(function(d, i) {
+            d3.select(this)
+              .attr("transform", `skewX(-10) translate(${i / Math.tan(10) * 8} 0)`); // 5 SOON UPDATED
+          })
           .text(d => `${d.Median.toFixed(1)}`);
-
-        // Apply skew only to the labels group (not affecting position calculation)
-        labelGroup.attr("transform", "skewX(-10deg)");  // Apply skew after positioning
 
       }
     });
