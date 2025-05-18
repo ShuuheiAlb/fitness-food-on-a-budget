@@ -8,7 +8,9 @@ import random
 
 # Paths
 supa_out_path = "data/supa_out.csv"
+supa_out_backup_path = "data/supa_out_.csv"
 supb_out_path = "data/supb_out.csv"
+supb_out_backup_path = "data/supb_out_.csv"
 acfd_path = "data/afcd.xlsx"
 
 # Food options and constants
