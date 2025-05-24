@@ -5,140 +5,168 @@
   <title>Most Affordable Fitness Foods</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Bebas Neue', sans-serif;
-      background: #fff;
-      padding: 40px;
+    :root {
+      --main-dark: #333;
+      --main-white: #fff;
     }
-    h2 {
-      font-size: 35px;
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: 'Bebas Neue', sans-serif;
+      background: var(--main-white);
+      overflow: hidden; /* Prevent scrolling */
+      display: flex; /* Responsive layout */
+      flex-direction: column;
     }
     text {
       text-transform: uppercase;
       font-weight: bold;
-      fill: #333;
+      fill: var(--main-dark);
     }
-    .food-label, .median-label {
-      text-transform: uppercase;
-      font-weight: bold;
-      font-size: 28px;
+
+    svg {
+      width: 100vw; /* vw/vh: scaled to viewport */ 
+      height: 90vh;
+      display: block;
+      font-size: 5vh;
+      background-color: var(--main-dark);
     }
-    .line, .tick {
-      stroke: #333;
+    h1 {
+      height: 10vh;
+      margin: 1vh 10vw 0.5vh;
+      font-size: 5vh;
+      text-align: right;
     }
     select {
-      margin-bottom: 20px;
-      font-size: 16px;
+      font-size: 3vh;
+      vertical-align: middle;
+      width: auto;
     }
   </style>
 </head>
+
 <body>
-  <h2>Most Affordable Fitness Foods</h2>
-  <select id="category-select"></select>
-  <svg width="1000" height="800"></svg>
+  <svg></svg>
+  <h1>Foods by grams of <select id="category-select"> </select> per $ spent</h1>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script>
-    const svg = d3.select("svg");
-    const margin = { top: 20, left: 100 };
-    const width = svg.attr("width") - margin.left;
+    // Rewrite stuff
+    const mainDark = getComputedStyle(document.documentElement).getPropertyValue('--main-dark').trim();
+    const mainWhite = getComputedStyle(document.documentElement).getPropertyValue('--main-white').trim();
 
-    const lineThickness = 4;
-    const spacing = 70
-    const lineHeightOffset = 0.8 * spacing;  // Offset for median line height
+    // I have no idea how this works but hey, it works :)
+    const svg = d3.select("svg");
+    let currentData = [];
 
     d3.json("supa_out.json").then(data => {
-      const categories = Array.from(new Set(data.map(d => d.Category)));
+      currentData = data;
 
+      const categories = Array.from(new Set(data.map(d => d.Category)));
+      
       const select = d3.select("#category-select");
-      select.selectAll("option")
+      select.append("option")
+        .attr("value", "")
+        .attr("disabled", true)
+        .attr("selected", true)
+        .text("Macro?");
+      select.selectAll("option.category-option") // %% SOON: NON-ALPHABET ORDER
         .data(categories)
         .enter()
         .append("option")
+        .classed("category-option", true)
         .text(d => d);
+      select.on("change", render);
 
-      select.on("change", () => render(select.property("value")));
+      //render(); // Initial render
+    })
 
-      render(categories[0]);
+    function render() {
+      const width = svg.node().getBoundingClientRect().width;
+      const height = svg.node().getBoundingClientRect().height;
 
-      function render(category) {
-        svg.selectAll("*").remove();
+      svg.selectAll("*").remove();
 
-        const filtered = data.filter(d => d.Category === category)
-                              .sort((a, b) => b.Median - a.Median);
-        const xScale = d3.scaleLinear()
-                         .domain([
-                           d3.min(filtered, d => d.Q1),
-                           d3.max(filtered, d => d.Q3)
-                         ])
-                         .range([margin.left, margin.left + width]);
+      const category = d3.select("#category-select").property("value") || currentData[0].Category;
 
-        const yScale = d3.scaleBand()
-                         .domain(filtered.map(d => d.Food))
-                         .range([margin.top, margin.top + filtered.length * spacing])
-                         .padding(0.5);
+      // Data selection
+      const filtered = currentData.filter(d => d.Category === category)
+                          .sort((a, b) => b.Median - a.Median);
+      // Y scale for vertical positions
+      const yScale = d3.scaleBand()
+                      .domain(filtered.map(d => d.Food))
+                      .range([0, height]);
+      // X scale for data values Q1 to Q3
+      const xScale = d3.scaleLinear()
+                      .domain([d3.min(filtered, d => d.Q1), d3.max(filtered, d => d.Q3)])
+                      .range([0, width]);
+      // Update height dynamically to fill entire 80vh vertically
+      const itemHeight = height / filtered.length;
 
-        const group = svg.append("g");
+      const group = svg.append("g");
 
-        // Draw lines (Q1-Q3)
-        group.selectAll(".line")
-          .data(filtered)
-          .enter()
-          .append("line")
-          .attr("class", "line")
-          .attr("x1", d => xScale(d.Q1))
-          .attr("x2", d => xScale(d.Q3))
-          .attr("y1", d => yScale(d.Food))
-          .attr("y2", d => yScale(d.Food))
-          .attr("stroke-width", lineThickness);  // Dynamic line thickness
+      // Draw the two strips per food item
+      filtered.forEach(d => {
+        const yTop = yScale(d.Food);
+        const yCenter = yTop + itemHeight/2;
 
-        // Draw median tick
-        group.selectAll(".tick")
-          .data(filtered)
-          .enter()
-          .append("line")
-          .attr("class", "tick")
-          .attr("x1", d => xScale(d.Median))
-          .attr("x2", d => xScale(d.Median))
-          .attr("y1", d => yScale(d.Food) - lineHeightOffset)  // Adjust starting point for Q2 line
-          .attr("y2", d => yScale(d.Food))
-          .attr("stroke-width", lineThickness);
+        // Coordinates and sizes for the two strips
+        const x1 = xScale(d.Q1);
+        const x2 = xScale(d.Median);
+        const x3 = xScale(d.Q3);
+        const gap = 0.005 * d3.min([height, width]);
 
-        // Add food labels (to the left)
-        group.selectAll(".food-label")
-          .data(filtered)
-          .enter()
-          .append("text")
-          .attr("class", "food-label")
-          .attr("x", d => xScale(d.Median) - 10)  // Positioned left of the line
-          .attr("y", d => yScale(d.Food) - lineHeightOffset/2)
+        const stripHeight = itemHeight - 2*gap; // so the strips do not join the strips below
+        const stripWidth1 = (x2 - x1) - 2*gap;
+        const stripCenterX1 = (x1 + x2) / 2;
+        const stripWidth2 = (x3 - x2) - 2*gap;
+        const stripCenterX2 = (x2 + x3) / 2;
+
+        // Create first strip (Q1 to Median)
+        group.append("rect")
+          .attr("x", x1 + gap)
+          .attr("y", yTop + gap)
+          .attr("width", stripWidth1)
+          .attr("height", stripHeight)
+          .attr("fill", mainWhite) // %% SOONNNN: paralllelogram
+
+        // Create second strip (Median to Q3)
+        group.append("rect")
+          .attr("x", x2 + gap)
+          .attr("y", yTop + gap)
+          .attr("width", stripWidth2)
+          .attr("height", stripHeight)
+          .attr("fill", mainWhite);
+          
+        // Add food + median label to the sides
+        group.append("text")
+          .attr("x", x2 - gap)
+          .attr("y", yCenter)
+          .attr("dominant-baseline", "middle")
           .attr("text-anchor", "end")
-          .attr("dominant-baseline", "middle")
-          .each(function(d, i) {
-            // `this` is the current text element in the loop
-            d3.select(this)
-              .attr("transform", `skewX(-10) translate(${i / Math.tan(10) * 7} 0)`); // 5 SOON UPDATED
-          })
-          .text(d => d.Food);
+          .attr("fill", mainDark)
+          .attr("font-weight", "bold")
+          .text(d.Food);
 
-        // Add median labels (to the right)
-        group.selectAll(".median-label")
-          .data(filtered)
-          .enter()
-          .append("text")
-          .attr("class", "median-label")
-          .attr("x", d => xScale(d.Median) + 10)  // Positioned right of the line
-          .attr("y", d => yScale(d.Food) - lineHeightOffset/2)
+        group.append("text")
+          .attr("x", x2 + gap)
+          .attr("y", yCenter)
+          .attr("dominant-baseline", "middle")
           .attr("text-anchor", "start")
-          .attr("dominant-baseline", "middle")
-          .each(function(d, i) {
-            d3.select(this)
-              .attr("transform", `skewX(-10) translate(${i / Math.tan(10) * 8} 0)`); // 5 SOON UPDATED
-          })
-          .text(d => `${d.Median.toFixed(1)}`);
+          .attr("fill", mainWhite)
+          .attr("font-weight", "bold")
+          .text(d.Median.toFixed(1));
+      });
+    }
 
-      }
+    // Re-render when screen is sized
+    window.addEventListener("resize", () => {
+      render(currentData);
     });
   </script>
+
 </body>
 </html>
