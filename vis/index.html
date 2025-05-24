@@ -8,6 +8,8 @@
     :root {
       --main-dark: #333;
       --main-white: #fff;
+      --accent-color: #5599cc;
+      --accent-color-2: #1f77b4;
     }
 
     html, body {
@@ -21,27 +23,26 @@
       display: flex; /* Responsive layout */
       flex-direction: column;
     }
-    text {
-      text-transform: uppercase;
-      font-weight: bold;
-      fill: var(--main-dark);
-    }
 
     svg {
       width: 100vw; /* vw/vh: scaled to viewport */ 
-      height: 90vh;
       display: block;
-      font-size: 5vh;
       background-color: var(--main-dark);
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    #svg-main {
+      height: 90vh;
     }
     h1 {
       height: 10vh;
       margin: 1vh 10vw 0.5vh;
-      font-size: 5vh;
+      font-size: 7vh;
+      text-transform: uppercase;
       text-align: right;
     }
     select {
-      font-size: 3vh;
+      font-size: 5vh;
       vertical-align: middle;
       width: auto;
     }
@@ -49,7 +50,7 @@
 </head>
 
 <body>
-  <svg></svg>
+  <svg id="svg-main"></svg>
   <h1>Foods by grams of <select id="category-select"> </select> per $ spent</h1>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -57,9 +58,11 @@
     // Rewrite stuff
     const mainDark = getComputedStyle(document.documentElement).getPropertyValue('--main-dark').trim();
     const mainWhite = getComputedStyle(document.documentElement).getPropertyValue('--main-white').trim();
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+    const accentColor2 = getComputedStyle(document.documentElement).getPropertyValue('--accent-color-2').trim();
 
     // I have no idea how this works but hey, it works :)
-    const svg = d3.select("svg");
+    const svgMain = d3.select("#svg-main");
     let currentData = [];
 
     d3.json("supa_out.json").then(data => {
@@ -85,10 +88,10 @@
     })
 
     function render() {
-      const width = svg.node().getBoundingClientRect().width;
-      const height = svg.node().getBoundingClientRect().height;
+      const width = svgMain.node().getBoundingClientRect().width;
+      const height = svgMain.node().getBoundingClientRect().height;
 
-      svg.selectAll("*").remove();
+      svgMain.selectAll("*").remove();
 
       const category = d3.select("#category-select").property("value") || currentData[0].Category;
 
@@ -99,14 +102,16 @@
       const yScale = d3.scaleBand()
                       .domain(filtered.map(d => d.Food))
                       .range([0, height]);
+
+      // Update height dynamically to fill entire 80vh vertically
+      const itemHeight = height / filtered.length;
       // X scale for data values Q1 to Q3
+      const skewOffset = Math.tan(10 * Math.PI / 180) * itemHeight; // horizontal shift due to 10° skew
       const xScale = d3.scaleLinear()
                       .domain([d3.min(filtered, d => d.Q1), d3.max(filtered, d => d.Q3)])
                       .range([0, width]);
-      // Update height dynamically to fill entire 80vh vertically
-      const itemHeight = height / filtered.length;
 
-      const group = svg.append("g");
+      const group = svgMain.append("g");
 
       // Draw the two strips per food item
       filtered.forEach(d => {
@@ -117,47 +122,57 @@
         const x1 = xScale(d.Q1);
         const x2 = xScale(d.Median);
         const x3 = xScale(d.Q3);
-        const gap = 0.005 * d3.min([height, width]);
+        const gap = 0.01 * d3.min([height, width]); // styling: only leave median as gap
 
-        const stripHeight = itemHeight - 2*gap; // so the strips do not join the strips below
-        const stripWidth1 = (x2 - x1) - 2*gap;
+        const stripHeight = itemHeight;
+        const stripWidth1 = (x2 - x1) - gap;
         const stripCenterX1 = (x1 + x2) / 2;
-        const stripWidth2 = (x3 - x2) - 2*gap;
+        const stripWidth2 = (x3 - x2) - gap;
         const stripCenterX2 = (x2 + x3) / 2;
+        const tinyOverlap = 0.5;
 
         // Create first strip (Q1 to Median)
-        group.append("rect")
-          .attr("x", x1 + gap)
-          .attr("y", yTop + gap)
-          .attr("width", stripWidth1)
-          .attr("height", stripHeight)
-          .attr("fill", mainWhite) // %% SOONNNN: paralllelogram
+        group.append("polygon")
+          .attr("points", `
+            ${x1 + skewOffset/2},${yTop - tinyOverlap}
+            ${x1 + stripWidth1 + skewOffset/2},${yTop - tinyOverlap}
+            ${x1 + stripWidth1 - skewOffset/2},${yTop + stripHeight + tinyOverlap}
+            ${x1 - skewOffset/2 },${yTop + stripHeight + tinyOverlap}
+          `)
+          .attr("fill", mainWhite);
 
         // Create second strip (Median to Q3)
-        group.append("rect")
-          .attr("x", x2 + gap)
-          .attr("y", yTop + gap)
-          .attr("width", stripWidth2)
-          .attr("height", stripHeight)
+        group.append("polygon")
+          .attr("points", `
+            ${x2 + (gap + skewOffset)/2},${yTop - tinyOverlap}
+            ${x2 + (gap + skewOffset)/2 + stripWidth2},${yTop - tinyOverlap}
+            ${x2 + (gap - skewOffset)/2 + stripWidth2},${yTop + stripHeight + tinyOverlap}
+            ${x2 + (gap - skewOffset)/2 },${yTop + stripHeight}
+          `)
           .attr("fill", mainWhite);
-          
-        // Add food + median label to the sides
-        group.append("text")
-          .attr("x", x2 - gap)
-          .attr("y", yCenter)
-          .attr("dominant-baseline", "middle")
-          .attr("text-anchor", "end")
-          .attr("fill", mainDark)
-          .attr("font-weight", "bold")
-          .text(d.Food);
 
+        // Add food label 
         group.append("text")
-          .attr("x", x2 + gap)
+          .attr("x", 0.3*width)
           .attr("y", yCenter)
           .attr("dominant-baseline", "middle")
           .attr("text-anchor", "start")
-          .attr("fill", mainWhite)
-          .attr("font-weight", "bold")
+          .attr("fill", accentColor)
+          .attr("font-size", itemHeight)
+          .text(d.Food);
+        
+        // Median label?
+        const medX = 0.9*width
+        group.append("text")
+          .attr("x", medX)
+          .attr("y", yCenter)
+          .attr("dominant-baseline", "middle")
+          .attr("text-anchor", "middle")
+          .attr("fill", accentColor2)
+          .attr("font-size", 0.7 * itemHeight) // base font size
+          //.attr("textLength", 0.8 * itemHeight) // target length in px (width along baseline)
+          .attr("lengthAdjust", "spacingAndGlyphs")
+          //.attr("transform", `rotate(-90, ${medX - itemHeight/2}, ${yCenter})`)
           .text(d.Median.toFixed(1));
       });
     }
