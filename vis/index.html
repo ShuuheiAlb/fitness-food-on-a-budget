@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Most Affordable Fitness Foods</title>
+  <title>Fitness Foods on Budget</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
   <style>
     :root {
       --main-dark: #333;
       --main-white: #fff;
-      --accent-color: #5599cc;
-      --accent-color-2: #1f77b4;
+      --second-dark: #666;
+      --accent-color: #77bbee;
+      --accent-color-2: #4499dd;
     }
 
     html, body {
@@ -58,6 +59,7 @@
     // Rewrite stuff
     const mainDark = getComputedStyle(document.documentElement).getPropertyValue('--main-dark').trim();
     const mainWhite = getComputedStyle(document.documentElement).getPropertyValue('--main-white').trim();
+    const secondDark = getComputedStyle(document.documentElement).getPropertyValue('--second-dark').trim();
     const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
     const accentColor2 = getComputedStyle(document.documentElement).getPropertyValue('--accent-color-2').trim();
 
@@ -122,56 +124,62 @@
         const x1 = xScale(d.Q1);
         const x2 = xScale(d.Median);
         const x3 = xScale(d.Q3);
-        const gap = 0.01 * d3.min([height, width]); // styling: only leave median as gap
-
+        
         const stripHeight = itemHeight;
-        const stripWidth1 = (x2 - x1) - gap;
-        const stripCenterX1 = (x1 + x2) / 2;
-        const stripWidth2 = (x3 - x2) - gap;
-        const stripCenterX2 = (x2 + x3) / 2;
-        const tinyOverlap = 0.5;
+        const gap = 0.04 * d3.min([height, width]); // styling: only leave median as gap
+        const strokeW = 0.018 * d3.min([height, width]);
+        const tinyOverlap = 0;
 
-        // Create first strip (Q1 to Median)
+        // Create large strip (Q1 to Q3)
         group.append("polygon")
           .attr("points", `
             ${x1 + skewOffset/2},${yTop - tinyOverlap}
-            ${x1 + stripWidth1 + skewOffset/2},${yTop - tinyOverlap}
-            ${x1 + stripWidth1 - skewOffset/2},${yTop + stripHeight + tinyOverlap}
-            ${x1 - skewOffset/2 },${yTop + stripHeight + tinyOverlap}
+            ${x3 + skewOffset/2},${yTop - tinyOverlap}
+            ${x3 - skewOffset/2},${yTop + stripHeight + tinyOverlap}
+            ${x1 - skewOffset/2},${yTop + stripHeight + tinyOverlap}
           `)
-          .attr("fill", mainWhite);
+          .attr("fill", secondDark)
+          .attr("stroke", mainDark)
+          .attr("stroke-width", strokeW);
 
-        // Create second strip (Median to Q3)
+        // Create thin overlay Q2 strip
         group.append("polygon")
           .attr("points", `
-            ${x2 + (gap + skewOffset)/2},${yTop - tinyOverlap}
-            ${x2 + (gap + skewOffset)/2 + stripWidth2},${yTop - tinyOverlap}
-            ${x2 + (gap - skewOffset)/2 + stripWidth2},${yTop + stripHeight + tinyOverlap}
-            ${x2 + (gap - skewOffset)/2 },${yTop + stripHeight}
+            ${x2 - gap/2 + skewOffset/2},${yTop - tinyOverlap}
+            ${x2 + gap/2 + skewOffset/2},${yTop - tinyOverlap}
+            ${x2 + gap/2 - skewOffset/2},${yTop + stripHeight + tinyOverlap}
+            ${x2 - gap/2 - skewOffset/2},${yTop + stripHeight + tinyOverlap}
           `)
-          .attr("fill", mainWhite);
+          .attr("fill", mainWhite)
+          .attr("stroke", mainDark)
+          .attr("stroke-width", strokeW);
 
-        // Add food label 
+        // Add food label, position depending on boxplot
         group.append("text")
-          .attr("x", 0.3*width)
+          .attr("x", x2 > 0.5*width ? 0.2*width : 0.6*width)
           .attr("y", yCenter)
           .attr("dominant-baseline", "middle")
-          .attr("text-anchor", "start")
+          .attr("text-anchor", x2 > 0.5*width ? "start" : "end")
           .attr("fill", accentColor)
           .attr("font-size", itemHeight)
+          .attr("stroke", mainDark) // use shadow for clear reading within background
+          .attr("stroke-width", 0.01 * d3.min([height, width]))  
+          .attr("paint-order", "stroke")
+          .attr("transform", "skewX(-10)")
           .text(d.Food);
         
         // Median label?
-        const medX = 0.9*width
+        const medX = 0.98*width
         group.append("text")
           .attr("x", medX)
           .attr("y", yCenter)
           .attr("dominant-baseline", "middle")
-          .attr("text-anchor", "middle")
+          .attr("text-anchor", "end")
           .attr("fill", accentColor2)
           .attr("font-size", 0.7 * itemHeight) // base font size
           //.attr("textLength", 0.8 * itemHeight) // target length in px (width along baseline)
           .attr("lengthAdjust", "spacingAndGlyphs")
+          .style("font-style", "italic")
           //.attr("transform", `rotate(-90, ${medX - itemHeight/2}, ${yCenter})`)
           .text(d.Median.toFixed(1));
       });

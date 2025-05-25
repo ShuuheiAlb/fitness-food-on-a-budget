@@ -1,16 +1,22 @@
-# Fitness Food on a Budget
+# Fitness Food on Budget
 
-This project calculates macronutrient contents per unit price across a range of common foods available in two major Australian supermarket chains (Woolworths and Coles), with a goal of helping customers make informed, budget-conscious choices to support their health.
+This project helps you figure out the macronutrients you get per dollar from common foods at two big Aussie supermarkets - Woolworths and Coles. The goal is to help you make smarter, budget-friendly food choices that still support your health.
 
-The current visualisation is here: https://fitness-food-on-a-budget.streamlit.app/.
+The current visualisation is like this:
 
-The data was collected from web scraping with minimal number of requests: for each food type, the first page of its search result will be used to calculate in-stock median as the representative value of food's macronutrient amount per AUD$.
+![Stylicised horizontal boxplots showing foods ranked according to their highest macro level per dollar spent](data/image.png)
 
-The project is intended only for personal and educational purpose. I do not take any liabilities for any consequences resulting from the use of this project by others, nor am I affiliated with any of these companies.
+(Previous visualisation is: https://fitness-food-on-a-budget.streamlit.app/).
+
+I collected the data by scraping the first page of search results for each food type, then used the median values of in-stock items to calculate typical nutrient content per AUD$.
+
+The project is intended only for personal and educational purposes. I do not take any liability for any consequences that may arise from the use of this project by others, nor am I affiliated with any of these companies.
 
 ## How to use
 
-Run `supa.py` then `supb.py` then `streamlit run main.py`
+Run `supa.py`, then `supb.py` (coming soon), then `convert_to_json.py`.
+
+Serve the visualization by running this command inside the vis directory: `python3 -m http.server`
 
 ## Other tools used
 

@@ -18,6 +18,6 @@ summary = (
 )
 
 # Save as JSON for D3
-summary.to_json("supa_out.json", orient="records")
+summary.to_json("vis/supa_out.json", orient="records")
 
 # %%
