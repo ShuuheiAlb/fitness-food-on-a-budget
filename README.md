@@ -21,3 +21,7 @@ Serve the visualisation by running this command inside the vis directory: `pytho
 ## Other tools used
 
 Insomnia, VS Code Notebook, pipreqs
+
+## Inspiration
+
+This project was inspired by Jeremy Ethier’s video on budget-friendly healthy eating: [watch here](https://www.youtube.com/watch?v=PXub4lr-9J8).
