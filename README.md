@@ -14,9 +14,7 @@ The project is intended only for personal and educational purposes. I do not tak
 
 ## How to use
 
-Run `supa.py`, then `supb.py` (coming soon), then `convert_to_json.py`.
-
-Serve the visualisation by running this command inside the vis directory: `python3 -m http.server` and `http://localhost:8000/` in your browser. 
+Run `supa.py`, then `supb.py` (coming soon), then runn the visualisation inside the `vis` folder: `python3 -m http.server` and `http://localhost:8000/` in your browser. 
 
 ## Other tools used
 

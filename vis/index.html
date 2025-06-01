@@ -28,7 +28,7 @@
     svg {
       width: 100vw; /* vw/vh: scaled to viewport */ 
       display: block;
-      background-color: var(--main-dark);
+      background-color: var(--main-white);
       text-transform: uppercase;
       font-weight: bold;
     }
@@ -42,6 +42,16 @@
       text-transform: uppercase;
       text-align: right;
     }
+    #tooltip {
+      position: absolute; 
+      pointer-events: none; 
+      background: rgba(0,0,0,0.7); 
+      color: white; 
+      padding: 4px 8px; 
+      border-radius: 4px; 
+      font-size: 12px; 
+      visibility: hidden;
+    }
     select {
       font-size: 5vh;
       vertical-align: middle;
@@ -53,6 +63,7 @@
 <body>
   <svg id="svg-main"></svg>
   <h1>Foods by grams of <select id="category-select"> </select> per $ spent</h1>
+  <div id="tooltip"></div>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script>
@@ -68,9 +79,8 @@
     let currentData = [];
 
     d3.json("supa_out.json").then(data => {
-      currentData = data;
-
-      const categories = Array.from(new Set(data.map(d => d.Category)));
+      currentData = data.data;
+      const categories = currentData.map(d => d.Category);
       
       const select = d3.select("#category-select");
       select.append("option")
@@ -83,10 +93,9 @@
         .enter()
         .append("option")
         .classed("category-option", true)
+        .attr("value", d => d)
         .text(d => d);
       select.on("change", render);
-
-      //render(); // Initial render
     })
 
     function render() {
@@ -98,96 +107,107 @@
       const category = d3.select("#category-select").property("value") || currentData[0].Category;
 
       // Data selection
-      const filtered = currentData.filter(d => d.Category === category)
-                          .sort((a, b) => b.Median - a.Median);
-      // Y scale for vertical positions
-      const yScale = d3.scaleBand()
-                      .domain(filtered.map(d => d.Food))
-                      .range([0, height]);
+      const filtered = currentData.filter(d => d.Category === category)[0].data;
 
-      // Update height dynamically to fill entire 80vh vertically
-      const itemHeight = height / filtered.length;
-      // X scale for data values Q1 to Q3
-      const skewOffset = Math.tan(10 * Math.PI / 180) * itemHeight; // horizontal shift due to 10° skew
-      const xScale = d3.scaleLinear()
-                      .domain([d3.min(filtered, d => d.Q1), d3.max(filtered, d => d.Q3)])
-                      .range([0, width]);
-
-      const group = svgMain.append("g");
-
-      // Draw the two strips per food item
-      filtered.forEach(d => {
-        const yTop = yScale(d.Food);
-        const yCenter = yTop + itemHeight/2;
-
-        // Coordinates and sizes for the two strips
-        const x1 = xScale(d.Q1);
-        const x2 = xScale(d.Median);
-        const x3 = xScale(d.Q3);
-        
-        const stripHeight = itemHeight;
-        const gap = 0.04 * d3.min([height, width]); // styling: only leave median as gap
-        const strokeW = 0.018 * d3.min([height, width]);
-        const tinyOverlap = 0;
-
-        // Create large strip (Q1 to Q3)
-        group.append("polygon")
-          .attr("points", `
-            ${x1 + skewOffset/2},${yTop - tinyOverlap}
-            ${x3 + skewOffset/2},${yTop - tinyOverlap}
-            ${x3 - skewOffset/2},${yTop + stripHeight + tinyOverlap}
-            ${x1 - skewOffset/2},${yTop + stripHeight + tinyOverlap}
-          `)
-          .attr("fill", secondDark)
-          .attr("stroke", mainDark)
-          .attr("stroke-width", strokeW);
-
-        // Create thin overlay Q2 strip
-        group.append("polygon")
-          .attr("points", `
-            ${x2 - gap/2 + skewOffset/2},${yTop - tinyOverlap}
-            ${x2 + gap/2 + skewOffset/2},${yTop - tinyOverlap}
-            ${x2 + gap/2 - skewOffset/2},${yTop + stripHeight + tinyOverlap}
-            ${x2 - gap/2 - skewOffset/2},${yTop + stripHeight + tinyOverlap}
-          `)
-          .attr("fill", mainWhite)
-          .attr("stroke", mainDark)
-          .attr("stroke-width", strokeW);
-
-        // Add food label, position depending on boxplot
-        group.append("text")
-          .attr("x", x2 > 0.5*width ? 0.2*width : 0.6*width)
-          .attr("y", yCenter)
-          .attr("dominant-baseline", "middle")
-          .attr("text-anchor", x2 > 0.5*width ? "start" : "end")
-          .attr("fill", accentColor)
-          .attr("font-size", itemHeight)
-          .attr("stroke", mainDark) // use shadow for clear reading within background
-          .attr("stroke-width", 0.01 * d3.min([height, width]))  
-          .attr("paint-order", "stroke")
-          .attr("transform", "skewX(-10)")
-          .text(d.Food);
-        
-        // Median label?
-        const medX = 0.98*width
-        group.append("text")
-          .attr("x", medX)
-          .attr("y", yCenter)
-          .attr("dominant-baseline", "middle")
-          .attr("text-anchor", "end")
-          .attr("fill", accentColor2)
-          .attr("font-size", 0.7 * itemHeight) // base font size
-          //.attr("textLength", 0.8 * itemHeight) // target length in px (width along baseline)
-          .attr("lengthAdjust", "spacingAndGlyphs")
-          .style("font-style", "italic")
-          //.attr("transform", `rotate(-90, ${medX - itemHeight/2}, ${yCenter})`)
-          .text(d.Median.toFixed(1));
+      // Create flat list of {Food, Amount} for swarm
+      const points = [];
+      filtered.forEach((d, i) => {
+        d.Amount.forEach(a => {
+          points.push({ Food: d.Food, Amount: a});
+        });
       });
+
+      // X scale for data
+      const xExtent = d3.extent(points, d => d.Amount);
+      const xScale = d3.scaleLinear()
+                        .domain([xExtent[0], xExtent[1]])
+                        .range([0.2*width, 0.95*width]);
+      // Y scale for vertical positions
+      const itemHeight = height / filtered.length;
+      const yScale = d3.scaleBand()
+                        .domain(filtered.map(d => d.Food))
+                        .range([0.6*itemHeight, height]);
+
+      // Simulate beeswarm
+      const nodes = points.map(d => ({
+        ...d,
+        x: xScale(d.Amount),
+        y: yScale(d.Food)
+      }));
+      const simulation = d3.forceSimulation(nodes)
+        .force("x", d3.forceX(d => xScale(d.Amount)).strength(1))
+        .force("y", d3.forceY(d => yScale(d.Food)).strength(10))
+        .force("collide", d3.forceCollide(7))
+        .stop();
+      for (let i = 0; i < 120; ++i) simulation.tick();
+      //console.table(nodes, ["Food", "Amount", "x", "y", ]);
+
+      // Draw
+      const g = svgMain.append("g");
+      const tooltip = d3.select("#tooltip");
+
+      g.selectAll("circle")
+        .data(nodes)
+        .enter()
+        .append("circle")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", 5)
+        .attr("fill", accentColor)
+        .attr("stroke", accentColor2)
+        .attr("stroke-width", 0.5)
+        .attr("opacity", 0.5) // faint look
+        .on("mouseover", (event, d) => {
+          tooltip.style("visibility", "visible")
+                .text(`${d.Amount.toFixed(2)}`);
+        })
+        .on("mousemove", (event) => {
+          tooltip.style("top", (event.pageY + 10) + "px")
+                .style("left", (event.pageX + 10) + "px");
+        })
+        .on("mouseout", () => {
+          tooltip.style("visibility", "hidden");
+        });
+
+      // Add food labels
+      g.selectAll("food-label")
+        .data(filtered)
+        .enter()
+        .append("text")
+        .attr("x", 0.05*width)
+        .attr("y", d => yScale(d.Food) + 0.1*itemHeight)
+        .style("font-size", "5vh")
+        .style("font-style", "italic")
+        .text(d => d.Food);
+
+      // Add median label
+      const squareSize = itemHeight * 0.3; // Adjust size as needed
+      g.selectAll("rect")
+        .data(filtered)
+        .enter()
+        .append("rect")
+        .attr("x", d => xScale(d.Median) - squareSize / 2)  // center the square on median
+        .attr("y", d => yScale(d.Food) - squareSize / 2)
+        .attr("width", squareSize)
+        .attr("height", squareSize)
+        .attr("fill", accentColor2)
+        .attr("stroke-width", 2);
+      g.selectAll("text.median-label")
+        .data(filtered)
+        .enter()
+        .append("text")
+        .classed("median-label", true)
+        .attr("x", d => xScale(d.Median) + squareSize) // position just right of square
+        .attr("y", d => yScale(d.Food) - squareSize / 4) // center text vertically w/ square
+        .text(d => d.Median.toFixed(2))
+        .attr("font-size", itemHeight * 0.3) // tweak size as needed
+        .attr("fill", accentColor2)
+        .attr("dominant-baseline", "middle");
     }
 
     // Re-render when screen is sized
     window.addEventListener("resize", () => {
-      render(currentData);
+      render();
     });
   </script>
 

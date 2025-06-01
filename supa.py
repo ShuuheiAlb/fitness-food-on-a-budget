@@ -80,3 +80,27 @@ with open(lib.supa_out_path, 'w', newline='') as f:
     writer = csv.writer(f)
     writer.writerows([["Category", "Food", "Amount"]])
     writer.writerows(macro_per_AUD_df)
+
+# Also prepare sorted data for d3 vis
+from pathlib import Path
+from collections import OrderedDict, defaultdict
+from statistics import median
+
+grouped = OrderedDict()
+for category, food, amount in macro_per_AUD_df:
+    grouped.setdefault(category, []).append((food, amount))
+
+json_out = {"data": []}
+for c, entries in grouped.items():
+    food_map = defaultdict(list)
+    for f, a in entries:
+        food_map[f].append(a)
+    foods_sorted = sorted(((f, median(amts)) for f, amts in food_map.items()), key=lambda x: x[1], reverse=True)
+    json_out["data"].append({
+        "Category": c,
+        "data": [{"Food": f, "Amount": food_map[f], "Median": m} for f, m in foods_sorted]
+    })
+
+with open(Path(lib.supa_out_path).parent.parent / "vis" / "supa_out.json", 'w') as jf:
+    json.dump(json_out, jf, indent=4)
+
