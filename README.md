@@ -50,16 +50,21 @@ Products with the same brand but different sizes appear as separate options on t
 
 
 ## Tools Used
+
+- Python with native libraries (or "close to native" libraries)
+- d3.js for visualisation (previously: Streamlit)
 - Insomnia (API testing)
 - VS Code Notebook
 - pipreqs (dependency management)
 
 
 ## Inspiration
+
 This project was inspired by Jeremy Ethier's video on budget-friendly healthy eating:[watch here](https://www.youtube.com/watch?v=PXub4lr-9J8).
 
 
 ## Disclaimer
+
 This project is intended for personal and educational purposes only. I take no liability for any consequences arising from the use of this project, nor am I affiliated with any of the mentioned companies.
 
 ---
