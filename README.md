@@ -1,25 +1,67 @@
-# Fitness Food on Budget
 
-This project helps you figure out the macronutrients you get per dollar from common foods at two big Aussie supermarkets - Woolworths and Coles. The goal is to help you make smarter, budget-friendly food choices that still support your health.
+# Fitness Food on a Budget: Infographics
 
-The current visualisation is like this:
+This project summarises the macronutrients you get per dollar from common foods at major Australian supermarkets. The goal is to help you make smarter, budget-friendly food choices that still support your fitness goals.
 
-![Stylicised horizontal boxplots showing foods ranked according to their highest macro level per dollar spent](data/image.png)
+**Current Status:** The Woolworths data collection and visualization are complete. Coles implementation is in progress (delayed due to bot prevention measures on their website).
 
-(Previous visualisation is: https://fitness-food-on-a-budget.streamlit.app/).
+![Current visualisation](data/image.png)
 
-I collected the data by scraping the first page of search results for each food type, then used the median values of in-stock items to calculate typical nutrient content per AUD$.
 
-The project is intended only for personal and educational purposes. I do not take any liability for any consequences that may arise from the use of this project by others, nor am I affiliated with any of these companies.
+## Data Collection Methodology
 
-## How to use
+I collected data by scraping the first page of search results for each food category, then calculated median values from in-stock items to determine typical nutrient content per AUD$.
 
-Run `supa.py`, then `supb.py` (coming soon), then runn the visualisation inside the `vis` folder: `python3 -m http.server` and `http://localhost:8000/` in your browser. 
 
-## Other tools used
+### Why Median of In-Stock Items?
 
-Insomnia, VS Code Notebook, pipreqs
+This approach models a realistic shopping scenario where a customer walks down a supermarket aisle looking at a specific food category.
+
+**The Customer Shopping Model:**
+- Customers only see items that are currently in stock on the shelf
+- Each visible product (different brands, sizes, packaging) represents one choice option
+- Customers are assumed to notice all available options and choose with equal probability
+
+**Why Not Other Statistical Measures?**
+
+**Mean:** Too volatile. Premium brands with fluctuating availability can skew results dramatically when they go in/out of stock.
+
+**Weighted Mean:** Larger package sizes don't necessarily increase the likelihood of a customer choosing that particular macronutrient concentration.
+
+**Minimum (cheapest option):** 
+- Highly volatile due to stock fluctuations
+- Cheapest options are often highly processed, contradicting fitness goals
+- Larger "value" sizes may exceed customer needs (depending on lifestyle, family size, etc.)
+
+**Why Different Sizes = Different Products?**
+Products with the same brand but different sizes appear as separate options on the shelf, giving customers distinct choices with different macro/dollar ratios. Combining them would misrepresent the actual shopping experience.
+
+
+## How to Use
+
+1. Run `supa.py` (Woolworths scraper)
+2. Run `supb.py` (Coles scraper - coming soon)
+3. Start the visualization server:
+   ```bash
+   cd vis
+   python3 -m http.server
+   ```
+4. Open `http://localhost:8000/` in your browser
+
+
+## Tools Used
+- Insomnia (API testing)
+- VS Code Notebook
+- pipreqs (dependency management)
+
 
 ## Inspiration
+This project was inspired by Jeremy Ethier's video on budget-friendly healthy eating:[watch here](https://www.youtube.com/watch?v=PXub4lr-9J8).
 
-This project was inspired by Jeremy Ethier’s video on budget-friendly healthy eating: [watch here](https://www.youtube.com/watch?v=PXub4lr-9J8).
+
+## Disclaimer
+This project is intended for personal and educational purposes only. I take no liability for any consequences arising from the use of this project, nor am I affiliated with any of the mentioned companies.
+
+---
+
+*Note: This represents one of my first major data analysis projects, involving significant trial and error in data collection, methodology refinement, and visualization development.*
